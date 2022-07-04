@@ -156,6 +156,16 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop
 end
 
+function update!(cm::ComponentModifier, ppane::Component, plot)
+    io::IOBuffer = IOBuffer();
+    show(io, "text/html", plot)
+    data::String = String(io.data)
+    data = replace(data,
+     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
+    set_text!(cm, ppane.name, data)
+end
+
+
 option(name::String, args ...) = Component(name, "option", args)
 export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
 export textbox, pane, anypane, stylesheet
