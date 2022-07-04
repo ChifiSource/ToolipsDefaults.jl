@@ -1,5 +1,6 @@
 module ToolipsDefaults
 using Toolips
+using ToolipsSession
 
 mutable struct ColorScheme
     background::String
