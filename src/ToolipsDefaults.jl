@@ -65,7 +65,7 @@ function anydiv(name::String, plot::Any, mime::String = "text/html")
 end
 
 function anypane(name::String, plot::Any, mime::String = "text/html";
-    float::String = "left")
+    pack::String = "left")
     plot_div::Component = divider(name)
     style!(plot_div, "float" => float)
     io::IOBuffer = IOBuffer();
@@ -77,7 +77,7 @@ function anypane(name::String, plot::Any, mime::String = "text/html";
     plot_div
 end
 
-function pane(name::String; float::String = "left")
+function pane(name::String; pack::String = "left")
     pane_div::Component = divider(name)
     style!(pane_div, "float" => float)
     pane_div
