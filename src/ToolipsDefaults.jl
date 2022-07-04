@@ -52,6 +52,18 @@ function stylesheet(cs::ColorScheme = ColorScheme();
                 h4s, h5s)
 end
 
+
+function anydiv(name::String, plot::Any, mime::String = "text/html")
+    plot_div::Component = divider(name)
+    io::IOBuffer = IOBuffer();
+    show(io, mime, plot)
+    data::String = String(io.data)
+    data = replace(data,
+     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
+    plot_div[:text] = data
+    plot_div
+end
+
 function anypane(name::String, plot::Any, mime::String = "text/html";
     float::String = "left")
     plot_div::Component = divider(name)
