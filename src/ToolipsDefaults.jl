@@ -79,7 +79,7 @@ end
 
 function pane(name::String; pack::String = "left")
     pane_div::Component = divider(name)
-    style!(pane_div, "float" => pack)
+    style!(pane_div, "float" => "left")
     pane_div
 end
 
