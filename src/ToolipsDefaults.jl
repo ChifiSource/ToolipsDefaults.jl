@@ -51,7 +51,7 @@ function stylesheet(cs::ColorScheme = ColorScheme();
         h3s = Style("h3", color = cs.heading3)
         h4s = Style("h4", color = cs.heading4)
         h5s = Style("h5", color = cs.heading5)
-        components(bodys, divs, buttons, button_hover, as, ps, h1s, h2s, h3s,
+        components(bodys, divs, buttons, as, ps, h1s, h2s, h3s,
                 h4s, h5s)
 end
 
