@@ -1,5 +1,6 @@
 module ToolipsDefaults
 using Toolips
+using ToolipsSession
 
 mutable struct ColorScheme
     background::String
@@ -52,11 +53,11 @@ function stylesheet(cs::ColorScheme = ColorScheme();
                 h4s, h5s)
 end
 
-function anypane(name::String, plot::Any; float::String = "left")
+
+function anydiv(name::String, plot::Any, mime::String = "text/html")
     plot_div::Component = divider(name)
-    style!(plot_div, "float" => float)
     io::IOBuffer = IOBuffer();
-    show(io, "text/html", plot)
+    show(io, mime, plot)
     data::String = String(io.data)
     data = replace(data,
      """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
@@ -64,14 +65,27 @@ function anypane(name::String, plot::Any; float::String = "left")
     plot_div
 end
 
-function pane(name::String; float::String = "left")
+function anypane(name::String, plot::Any, mime::String = "text/html";
+    pack::String = "left")
+    plot_div::Component = divider(name)
+    style!(plot_div, "float" => pack)
+    io::IOBuffer = IOBuffer();
+    show(io, mime, plot)
+    data::String = String(io.data)
+    data = replace(data,
+     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
+    plot_div[:text] = data
+    plot_div
+end
+
+function pane(name::String; pack::String = "left")
     pane_div::Component = divider(name)
-    style!(pane_div, "float" => float)
+    style!(pane_div, "float" => "left")
     pane_div
 end
 
 """
-**Prrty Components**
+**Toolips Defaults**
 ### textbox(name::String, range::UnitRange = 1:10; text::String = "", size::Integer = 10) -> ::Component
 ------------------
 Creates a textbox component.
@@ -88,7 +102,7 @@ function textbox(name::String, range::UnitRange = 1:10;
 end
 
 """
-**Prrty Components**
+**Toolips Defaults**
 ### textbox(name::String, containername::String; text::String = "text") -> ::Component
 ------------------
 Creates a containertextbox component.
@@ -105,7 +119,7 @@ function containertextbox(name::String, containername::String; text::String = "t
 end
 
 """
-**Prrty Components**
+**Toolips Defaults**
 ### numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5) -> ::Component
 ------------------
 Creates a number input component.
@@ -120,7 +134,7 @@ function numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5)
 end
 
 """
-**Prrty Components**
+**Toolips Defaults**
 ### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
 ------------------
 Creates a range slider component.
@@ -142,6 +156,16 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop[:children] = options
     thedrop
 end
+
+function update!(cm::ComponentModifier, ppane::Component, plot)
+    io::IOBuffer = IOBuffer();
+    show(io, "text/html", plot)
+    data::String = String(io.data)
+    data = replace(data,
+     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
+    set_text!(cm, ppane.name, data)
+end
+
 
 option(name::String, args ...) = Component(name, "option", args)
 export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
