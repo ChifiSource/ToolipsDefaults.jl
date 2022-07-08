@@ -166,11 +166,11 @@ function update!(cm::ComponentModifier, ppane::Component, plot)
     set_text!(cm, ppane.name, data)
 end
 
-function audio(name::String; args::Any ...)
+function audio(name::String; args ...)
     component(name, "audio controls", args)
 end
 
-function video(name::String; args::Any ...)
+function video(name::String; args ...)
     Component(name, "video", args)
 end
 
