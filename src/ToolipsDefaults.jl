@@ -42,7 +42,7 @@ function stylesheet(cs::ColorScheme = ColorScheme();
         transition = ".5s")
         buttons["background-color"] = cs.faces
         buttons["border-style"] = "none"
-        buttons:"hover":["background-color" => cs.faces_hover, "width" => "20%", "height" => "20%"]
+        buttons:"hover":["background-color" => cs.faces_hover, "width" => ".5%", "height" => "20%"]
         buttons["border-radius"] = "5px"
         as = Style("a", color = cs.text)
         ps = Style("p", color = cs.text)
