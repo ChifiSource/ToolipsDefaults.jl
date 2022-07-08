@@ -36,11 +36,13 @@ function stylesheet(cs::ColorScheme = ColorScheme();
         bodys = Style("body")
         bodys["background-color"] = cs.background
         divs = Style("div", padding = padding)
+        divs["border-radius"] = "15px"
         divs["background-color"] = cs.foreground
         buttons = Style("button", padding = face_padding, color = cs.text)
         buttons["background-color"] = cs.faces
-        button_hover = Style("button:hover", padding = face_padding,
-        color = cs.text)
+        buttons["border-style"] = "none"
+        button:hover:["background-color" => cs.faces_hover]
+        buttons["border-radius"] = "5px"
         button_hover["background-color"] = cs.faces_hover
         as = Style("a", color = cs.text)
         ps = Style("p", color = cs.text)
