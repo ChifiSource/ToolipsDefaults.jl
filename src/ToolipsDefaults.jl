@@ -68,10 +68,9 @@ function anydiv(name::String, plot::Any, mime::String = "text/html")
     plot_div
 end
 
-function anypane(name::String, plot::Any, mime::String = "text/html";
-    pack::String = "left")
-    plot_div::Component = divider(name)
-    style!(plot_div, "float" => pack)
+function anypane(name::String, plot::Any, mime::String = "text/html"; args ...)
+    plot_div::Component = divider(name, args)
+    style!(plot_div, dissplay => "inline-block")
     io::IOBuffer = IOBuffer();
     show(io, mime, plot)
     data::String = String(io.data)
@@ -81,11 +80,24 @@ function anypane(name::String, plot::Any, mime::String = "text/html";
     plot_div
 end
 
-function pane(name::String; pack::String = "left")
+function pane(name::String; args ...)
     pane_div::Component = divider(name)
-    style!(pane_div, "float" => "left")
+    style!(pane_div, "display" => "inline-block")
     pane_div
 end
+
+function cursor(name::String, args ...)
+    cursor_updater = script(name, args)
+    cursor_updater["x"] = "1"
+    cursor_updater["y"] = "1"
+    cursor_updater[:text] = """setTimeOut(function () {
+        document.getElementById("$name").x = event.clientX;
+        document.getElementById("$name").y = event.clienty;
+    }, 1000);
+   """
+   cursor_updater
+end
+
 
 """
 **Toolips Defaults**
@@ -101,7 +113,7 @@ function textbox(name::String, range::UnitRange = 1:10;
                 text::String = "", size::Integer = 10)
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
-        oninput = "\"this.setAttribute('selected',this.value);\"")
+        oninput = "\"this.setAttribute('value',this.value);\"")
 end
 
 """
@@ -133,7 +145,7 @@ Creates a number input component.
 """
 function numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5)
     input(name, type = "number", min = range[1], max = range[2],
-    selected = value, oninput = "\"this.setAttribute('selected',this.value);\"")
+    selected = value, oninput = "\"this.setAttribute('value',this.value);\"")
 end
 
 """
