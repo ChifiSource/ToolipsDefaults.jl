@@ -14,12 +14,12 @@ mutable struct ColorScheme
     heading4::String
     heading5::String
     function ColorScheme(;
-        foreground::String = "#B79FF1",
+        foreground::String = "#FDF8FF",
         background::String = "#8384DF",
         faces::String = "#F9AFEC",
         faces_hover::String = "#A2DEBD",
         text::String = "#FFFFFF",
-        heading1::String = "#FFD5FA",
+        heading1::String = "#00147e",
         heading2::String = "#01A7EC",
         heading3::String = "#FFC94B",
         heading4::String = "#FE8F5D",
@@ -166,6 +166,13 @@ function update!(cm::ComponentModifier, ppane::Component, plot)
     set_text!(cm, ppane.name, data)
 end
 
+function audio(name::String; args::Any ...)
+    component(name, "audio controls", args)
+end
+
+function video(name::String; args::Any ...)
+    Component(name, "video", args)
+end
 
 option(name::String, args ...) = Component(name, "option", args)
 export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
