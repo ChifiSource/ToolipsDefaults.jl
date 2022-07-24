@@ -1,4 +1,4 @@
-function anydiv(name::String, plot::Any, mime::String = "text/html")
+function div(name::String, plot::Any, mime::String = "text/html")
     plot_div::Component{:div} = divider(name)
     io::IOBuffer = IOBuffer();
     show(io, mime, plot)
@@ -9,32 +9,16 @@ function anydiv(name::String, plot::Any, mime::String = "text/html")
     plot_div
 end
 
-function anypane(name::String, plot::Any, mime::String = "text/html"; args ...)
-    plot_div::Component{:div} = divider(name, args)
-    style!(plot_div, dissplay => "inline-block")
-    io::IOBuffer = IOBuffer();
-    show(io, mime, plot)
-    data::String = String(io.data)
-    data = replace(data,
-     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
-    plot_div[:text] = data
-    plot_div
-end
-
-function pane(name::String; args ...)
-    pane_div::Component = divider(name)
-    style!(pane_div, "display" => "inline-block")
-    pane_div
-end
-
 function cursor(name::String, args ...)
-    cursor_updater = script(name, args)
+    cursor_updater = script(name, args ...)
     cursor_updater["x"] = "1"
     cursor_updater["y"] = "1"
-    cursor_updater[:text] = """setTimeOut(function () {
-        document.getElementById("$name").x = event.clientX;
-        document.getElementById("$name").y = event.clienty;
-    }, 1000);
+    cursor_updater[:text] = """
+    function updatecursor(event) {
+        document.getElementById("$name").setAttribute("x", event.clientX);
+        document.getElementById("$name").setAttribute("y", event.clientY);
+    }
+    document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
    cursor_updater
 end
@@ -140,7 +124,11 @@ end
 
 function update!(cm::ComponentModifier, ppane::AbstractComponent,
     comp::AbstractComponent)
-    spoof = Toolips.SpoofStream()
+    spoof = SpoofConnection()
     write!(spoof, comp)
     set_text!(cm, ppane.name, spoof.http.text)
+end
+
+function on_swipe(c::Connection, cursor::Component{script}, s::AbstractComponent, dir::String)
+    
 end
