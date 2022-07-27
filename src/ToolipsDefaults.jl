@@ -19,5 +19,5 @@ include("Styles.jl")
 include("Components.jl")
 export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
 export textbox, pane, anypane, stylesheet, cursor, static_observer, numberinput
-export update!, audio, video, option, loadbar
+export update!, audio, video, option, progress
 end # module

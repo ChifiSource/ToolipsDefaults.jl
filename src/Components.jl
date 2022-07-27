@@ -96,21 +96,18 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop
 end
 
-function audio(name::String, style::Style = audio_style(); args ...)
-    component(name, "audio controls", args)
+function audio(name::String, ps::Pair{String, String} ...; args ...)
+    component(name, "audio controls", ps..., args ...)
 end
 
-function video(name::String; args ...)
-    Component(name, "video", args)
+function video(name::String, ps::Pair{String, String} ...; args ...)
+    Component(name, "video", ps ..., args ...)
 end
 
-option(name::String, args ...) = Component(name, "option", args)
+option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
 
-function loadbar(f::Function, c::Connection)
-    internalprogress = divider()
-    progressbar = divider()
-    push!(progressbar, internalprogress)
-    progressbarobs = observer(c)
+function progress(name::String, ps::Pair{String, String} ...; args ...)
+    Component(name,"progress", ps..., args ...)
 end
 
 function update!(cm::ComponentModifier, ppane::AbstractComponent, plot::Any)
@@ -130,5 +127,5 @@ function update!(cm::ComponentModifier, ppane::AbstractComponent,
 end
 
 function on_swipe(c::Connection, cursor::Component{script}, s::AbstractComponent, dir::String)
-    
+
 end
