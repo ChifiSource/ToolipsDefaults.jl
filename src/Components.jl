@@ -97,7 +97,7 @@ function dropdown(name::String, options::Vector{Servable})
 end
 
 function audio(name::String, ps::Pair{String, String} ...; args ...)
-    component(name, "audio controls", ps..., args ...)
+    Component(name, "audio controls", ps..., args ...)
 end
 
 function video(name::String, ps::Pair{String, String} ...; args ...)
