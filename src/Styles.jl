@@ -37,24 +37,31 @@ function default_buttonstyle(cs::ColorScheme; face_padding::Integer = 5,
     radius2::Integer = 8)
     s = Style("button", padding = face_padding, color = cs.text_faces,
     "background-color" => cs.faces, "border-style" => "none",
-    "border-radius" => "$(radius2)px")
+    "border-radius" => "$(radius2)px", transition = 1second)
     s:"hover":["background-color" => "cs.faces_hover", "transform" => "scale(1.1)"]
     s
 end
 
-function stylesheet(name::String, cs::ColorScheme = ColorScheme();
+default_astyle(cs::ColorScheme) = Style("a", color = cs.color4)
+
+default_pstyle(cs::ColorScheme; textsize = 12pt) = ps = Style("p",
+    color = cs.text, "font-size" => "14pt")
+
+function default_sectionstyle(cs::ColorScheme; padding::String = 30px,
+    radius::String = 10px)
+
+end
+function sheet(name::String, cs::ColorScheme = ColorScheme() p::Pair ...;
                     textsize::Integer = 14, face_textsize::Integer = 12,
                     padding::Integer = 7, face_padding::Integer = 5,
                     radius1::Integer = 15, radius2::Integer = 8,
-                    transition::Float64 = 0.5)
-        sheet = Component(name, "sheet")
-        appname = title("appname", text = name)
-        description = meta("description", content = "default description")
+                    transition::Float64 = 0.5,
+                    args ...)
+        sheet = Component(name, "sheet", p ..., args ...)
         divs = default_divstyle(cs)
         buttons = default_buttonstyle(cs)
-        as = Style("a", color = cs.text)
-        ps = Style("p", color = cs.text)
-        ps["font-size"] = "14pt"
+        as = default_astyle(cs)
+        ps = default_pstyle(cs, textsize = textsize)
         sectionst = Style("section", padding = "30px")
         sectionst["border-color"] = cs.color3
         sectionst["border-width"] = "2px"
