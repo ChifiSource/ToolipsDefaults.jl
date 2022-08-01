@@ -30,7 +30,7 @@ end
 
 function default_divstyle(cs::ColorScheme; padding::Integer = 7, radius1::Integer = 15)
     Style("div", padding = padding, "background-color" => cs.background,
-    "border-radius" => "$(radius1)px")
+    "border-radius" => "$(radius1)px", "overflow-y" => "scroll")
 end
 
 function default_buttonstyle(cs::ColorScheme; face_padding::Integer = 5,
