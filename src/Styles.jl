@@ -51,7 +51,7 @@ function default_sectionstyle(cs::ColorScheme; padding::String = 30px,
     radius::String = 10px)
 
 end
-function sheet(name::String, cs::ColorScheme = ColorScheme() p::Pair ...;
+function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
                     textsize::Integer = 14, face_textsize::Integer = 12,
                     padding::Integer = 7, face_padding::Integer = 5,
                     radius1::Integer = 15, radius2::Integer = 8,
@@ -79,7 +79,7 @@ function sheet(name::String, cs::ColorScheme = ColorScheme() p::Pair ...;
         scrthumb = Style("::-webkit-scrollbar-thumb", background = "#797ef6",
         "border-radius" => "5px")
         push!(scrollbars.extras, scrtrack, scrthumb)
-        push!(sheet, appname, description, divs, buttons, sectionst, as, ps, h1s,
+        push!(sheet, divs, buttons, sectionst, as, ps, h1s,
          h2s, h3s,
                 h4s, h5s, scrollbars)
                 sheet
