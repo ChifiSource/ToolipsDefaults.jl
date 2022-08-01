@@ -37,7 +37,7 @@ function default_buttonstyle(cs::ColorScheme; face_padding::Integer = 5,
     radius2::Integer = 8)
     s = Style("button", padding = face_padding, color = cs.text_faces,
     "background-color" => cs.faces, "border-style" => "none",
-    "border-radius" => "$(radius2)px", transition = 1second)
+    "border-radius" => "$(radius2)px", transition = 1seconds)
     s:"hover":["background-color" => "cs.faces_hover", "transform" => "scale(1.1)"]
     s
 end
