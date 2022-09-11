@@ -47,17 +47,20 @@ tab(name::String, p::Pair{String, Any}; args ...) = Component(name,
     "tab", p ..., args ...)::Component{:tab}
 
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    mainview = div(name)
-    tabwindow = div("$name-tabwindow")
+    tabwindow = div("$name-tabwindow", selected = contents[1])
     content = div("$name-contents")
+    tabs = Vector{Servable}()
     for child in contents
-        childtab = tab("$(child.name)-tab")
+        childtab = tab("$(child.name)-tab", text = child.name)
         on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
             set_children!(cm, "$name-contents", [child])
             cm[tabwindow] = "selected" => child.name
         end
         push!(tabwindow, tab)
     end
+    tabwindow[:children] = tabs
+    push!(tabwindow, content)
+    tabwindow::Component{:div}
 end
 
 function cursor(name::String, args ...)
@@ -71,7 +74,7 @@ function cursor(name::String, args ...)
     }
     document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
-   cursor_updater
+   cursor_updater::Component{:script}
 end
 
 """
@@ -88,7 +91,7 @@ function textbox(name::String, range::UnitRange = 1:10;
                 text::String = "", size::Integer = 10)
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
-        oninput = "\"this.setAttribute('value',this.value);\"")
+        oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
 end
 """
 **Toolips Defaults**
@@ -102,7 +105,7 @@ Creates a number input component.
 """
 function numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5)
     input(name, type = "number", min = range[1], max = range[2],
-    selected = value, oninput = "\"this.setAttribute('value',this.value);\"")
+    selected = value, oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
 end
 
 """
