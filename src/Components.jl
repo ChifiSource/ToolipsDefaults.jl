@@ -6,7 +6,49 @@ function div(name::String, plot::Any, mime::String = "text/html")
     data = replace(data,
      """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
     plot_div[:text] = data
-    plot_div
+    plot_div::Component{:div}
+end
+
+function textdiv(name::String, p::Pair{String, String} ...; args ...)
+    box = div(name, contenteditable = true, rawtext = "", selection = "", x = 0,
+    y = 0, p ..., args ...)
+    boxupdater = script("$name-updater", text = """
+    function getCaretCoordinates() {
+  let x = 0,
+    y = 0;
+  const isSupported = typeof window.getSelection !== "undefined";
+  if (isSupported) {
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = selection.getRangeAt(0).cloneRange();
+      range.collapse(true);
+      const rect = range.getClientRects()[0];
+      if (rect) {
+        x = rect.left;
+        y = rect.top;
+      }
+    }
+  }
+  return { x, y };
+}
+    function updatecursor(event) {
+        document.getElementById("$name").setAttribute("selection", window.getSelection());
+        var coords = getCaretCoordinates();
+        document.getElementById("$name").setAttribute("x", coords[0]);
+        document.getElementById("$name").setAttribute("y", coords[1]);
+    }
+    document.getElementById("$name").addEventListener("drag", updatecursor);
+    """)
+    push!(box.extras, boxupdater)
+    box::Component{:div}
+end
+
+function tab()
+
+end
+
+function tabbedview(cotents::Vector{Servable})
+
 end
 
 function cursor(name::String, args ...)
@@ -39,24 +81,6 @@ function textbox(name::String, range::UnitRange = 1:10;
         value = text, size = size,
         oninput = "\"this.setAttribute('value',this.value);\"")
 end
-
-"""
-**Toolips Defaults**
-### textbox(name::String, containername::String; text::String = "text") -> ::Component
-------------------
-Creates a containertextbox component.
-#### example
-```
-
-```
-"""
-function containertextbox(name::String, containername::String; text::String = "text")
-    container = divider(containername, contenteditable = "true")
-    txtbox = a(name, text = text)
-    push!(container, txtbox)
-    container
-end
-
 """
 **Toolips Defaults**
 ### numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5) -> ::Component
@@ -110,6 +134,14 @@ function progress(name::String, ps::Pair{String, String} ...; args ...)
     Component(name,"progress", ps..., args ...)
 end
 
+function colorinput()
+
+end
+
+function tabbedview()
+
+end
+
 function update!(cm::ComponentModifier, ppane::AbstractComponent, plot::Any)
     io::IOBuffer = IOBuffer();
     show(io, "text/html", plot)
@@ -126,6 +158,8 @@ function update!(cm::ComponentModifier, ppane::AbstractComponent,
     set_text!(cm, ppane.name, spoof.http.text)
 end
 
-function on_swipe(c::Connection, cursor::Component{script}, s::AbstractComponent, dir::String)
-
+function on_swipe(c::Connection, cursor::Component{script}, dir::String)
+    checkscript = script(text = """
+    """)
+    push!(cursor.extras, checkscript)
 end
