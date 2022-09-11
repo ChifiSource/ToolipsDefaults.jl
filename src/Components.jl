@@ -43,12 +43,21 @@ function textdiv(name::String, p::Pair{String, String} ...; args ...)
     box::Component{:div}
 end
 
-function tab()
+tab(name::String, p::Pair{String, Any}; args ...) = Component(name,
+    "tab", p ..., args ...)::Component{:tab}
 
-end
-
-function tabbedview(cotents::Vector{Servable})
-
+function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
+    mainview = div(name)
+    tabwindow = div("$name-tabwindow")
+    content = div("$name-contents")
+    for child in contents
+        childtab = tab("$(child.name)-tab")
+        on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
+            set_children!(cm, "$name-contents", [child])
+            cm[tabwindow] = "selected" => child.name
+        end
+        push!(tabwindow, tab)
+    end
 end
 
 function cursor(name::String, args ...)

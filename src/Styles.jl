@@ -42,15 +42,29 @@ function default_buttonstyle(cs::ColorScheme; face_padding::Integer = 5,
     s
 end
 
+function default_tabstyle(cs::ColorScheme; radiustop::Int64 = 5,
+    face_padding::Int64 = 5)
+    s = Style("tab", padding = face_padding, transition = 1seconds,
+    "backgroundcolor" => cs.faces, color = cs.text_faces)
+    s::Style
+end
+
 default_astyle(cs::ColorScheme) = Style("a", color = cs.color4)
 
 default_pstyle(cs::ColorScheme; textsize = 12pt) = ps = Style("p",
     color = cs.text, "font-size" => "14pt")
 
-function default_sectionstyle(cs::ColorScheme; padding::String = 30px,
-    radius::String = 10px)
+function default_sectionstyle(cs::ColorScheme; padding::Any = 30px,
+    radius::Any = 10px)
+    sectionst = Style("section", padding = "30px", "border-color" => cs.color3,
+    "border-width" = "2px", "border-radius" => 10px, "border-style" => "solid",
+    "transition" => 1seconds)
+end
+
+function default_scrollstyle(cs::ColorScheme; padding::String)
 
 end
+
 function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
                     textsize::Integer = 14, face_textsize::Integer = 12,
                     padding::Integer = 7, face_padding::Integer = 5,
@@ -62,13 +76,8 @@ function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
         buttons = default_buttonstyle(cs)
         as = default_astyle(cs)
         ps = default_pstyle(cs, textsize = textsize)
-        sectionst = Style("section", padding = "30px")
-        sectionst["border-color"] = cs.color3
-        sectionst["border-width"] = "2px"
-        sectionst["border-radius"] = "10px"
-        sectionst["border-style"] = "solid"
-        sectionst["background-color"] = "white"
-        sectionst["transition"] = "1s"
+        sectionst = default_sectionstyle(cs, padding = padding)
+        tabs = default_tabstyle(cs)
         h1s = Style("h1", color = cs.color1)
         h2s = Style("h2", color = cs.color2)
         h3s = Style("h3", color = cs.color3)
