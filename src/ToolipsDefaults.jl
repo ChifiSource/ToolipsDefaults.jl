@@ -11,12 +11,13 @@ The ToolipsDefaults extension provides various default Styles and Components for
 - [**ToolipsDefaults**](https://github.com/ChifiSource/Toolips.jl)
 """
 module ToolipsDefaults
-
 using Toolips
 import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection
 using ToolipsSession
+
 include("Styles.jl")
 include("Components.jl")
+
 export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
 export textbox, pane, anypane, stylesheet, cursor, static_observer, numberinput
 export update!, audio, video, option, progress

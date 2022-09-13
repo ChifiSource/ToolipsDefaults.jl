@@ -1,14 +1,34 @@
+"""
+**Defaults**
+### write!(ac::Component{<:Any}, plot::Any, mime::MIME<:Any)
+------------------
+A catchall for `write!` on `Components` to display julia types.
+#### example
+```
+using Plots
+plt = plot(1:5, 1:5)
+pltdiv = div("pltdiv")
+write!(pltdiv, plot, MIME"text/html")
+```
+"""
 function write!(ac::Component{<:Any}, plot::Any, mime::MIME{<:Any} = MIME"text/html"())
     plot_div::Component{<:Any}
     data::String = String(io.data)
     data = replace(data,
      """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
     plot_div[:text] = data
-    plot_div::Component{:div}
 end
 
-function (io::IO, plot::Any, mime::)
+"""
+**Defaults**
+### textdiv(name::String; text::String = "example")
+------------------
+A textdiv is a considerably advanced textbox.
+#### example
+```
 
+```
+"""
 function textdiv(name::String; text::String = "example")
     box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
     y = 0)
@@ -20,8 +40,18 @@ function textdiv(name::String; text::String = "example")
         """)
         push!(box.extras, boxupdater)
         return(box)::Component{:div}
-    end
+end
 
+"""
+**Defaults**
+### get_raw(t::Component{:div}) -> ::String
+------------------
+Gets raw text of a `textdiv`.
+#### example
+```
+
+```
+"""
 get_raw(t::Component{:div}) = t["rawtext"]
 
 tab(name::String, p::Pair{String, Any}; args ...) = Component(name,
@@ -59,7 +89,7 @@ function cursor(name::String, args ...)
 end
 
 """
-**Toolips Defaults**
+**Defaults**
 ### textbox(name::String, range::UnitRange = 1:10; text::String = "", size::Integer = 10) -> ::Component
 ------------------
 Creates a textbox component.
@@ -74,6 +104,15 @@ function textbox(name::String, range::UnitRange = 1:10;
         value = text, size = size,
         oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
 end
+
+function textbox(name::String)
+
+end
+
+function menubar()
+
+end
+
 """
 **Toolips Defaults**
 ### numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5) -> ::Component
