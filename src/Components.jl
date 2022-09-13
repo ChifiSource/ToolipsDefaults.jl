@@ -1,7 +1,5 @@
-function div(name::String, plot::Any, mime::String = "text/html")
-    plot_div::Component{:div} = divider(name)
-    io::IOBuffer = IOBuffer();
-    show(io, mime, plot)
+function write!(ac::Component{<:Any}, plot::Any, mime::MIME{<:Any} = MIME"text/html"())
+    plot_div::Component{<:Any}
     data::String = String(io.data)
     data = replace(data,
      """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
@@ -9,39 +7,22 @@ function div(name::String, plot::Any, mime::String = "text/html")
     plot_div::Component{:div}
 end
 
-function textdiv(name::String, p::Pair{String, String} ...; args ...)
-    box = div(name, contenteditable = true, rawtext = "", selection = "", x = 0,
-    y = 0, p ..., args ...)
+function (io::IO, plot::Any, mime::)
+
+function textdiv(name::String; text::String = "example")
+    box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
+    y = 0)
     boxupdater = script("$name-updater", text = """
-    function getCaretCoordinates() {
-  let x = 0,
-    y = 0;
-  const isSupported = typeof window.getSelection !== "undefined";
-  if (isSupported) {
-    const selection = window.getSelection();
-    if (selection.rangeCount !== 0) {
-      const range = selection.getRangeAt(0).cloneRange();
-      range.collapse(true);
-      const rect = range.getClientRects()[0];
-      if (rect) {
-        x = rect.left;
-        y = rect.top;
-      }
+    function updateme(event) {
+        document.getElementById("$name").setAttribute("rawtext", document.getElementById("$name").textContent);
     }
-  }
-  return { x, y };
-}
-    function updatecursor(event) {
-        document.getElementById("$name").setAttribute("selection", window.getSelection());
-        var coords = getCaretCoordinates();
-        document.getElementById("$name").setAttribute("x", coords[0]);
-        document.getElementById("$name").setAttribute("y", coords[1]);
-    }
-    document.getElementById("$name").addEventListener("drag", updatecursor);
-    """)
-    push!(box.extras, boxupdater)
-    box::Component{:div}
-end
+        document.getElementById("$name").addEventListener("input", updateme);
+        """)
+        push!(box.extras, boxupdater)
+        return(box)::Component{:div}
+    end
+
+get_raw(t::Component{:div}) = t["rawtext"]
 
 tab(name::String, p::Pair{String, Any}; args ...) = Component(name,
     "tab", p ..., args ...)::Component{:tab}
@@ -143,7 +124,7 @@ end
 option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
 
 function progress(name::String, ps::Pair{String, String} ...; args ...)
-    Component(name,"progress", ps..., args ...)
+    Component(name, "progress", ps..., args ...)
 end
 
 function colorinput()

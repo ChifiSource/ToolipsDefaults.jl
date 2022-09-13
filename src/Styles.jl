@@ -57,7 +57,7 @@ default_pstyle(cs::ColorScheme; textsize = 12pt) = ps = Style("p",
 function default_sectionstyle(cs::ColorScheme; padding::Any = 30px,
     radius::Any = 10px)
     sectionst = Style("section", padding = "30px", "border-color" => cs.color3,
-    "border-width" = "2px", "border-radius" => 10px, "border-style" => "solid",
+    "border-width" => "2px", "border-radius" => 10px, "border-style" => "solid",
     "transition" => 1seconds)
 end
 
@@ -93,3 +93,7 @@ function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
                 h4s, h5s, scrollbars)
                 sheet
 end
+
+style!(c::Component{:sheet}, child::String, p::Pair{String, String}) = style!(c[:children], child, p ...)
+
+get(c::Component{<:Any}, child::String) = c[:children][child]

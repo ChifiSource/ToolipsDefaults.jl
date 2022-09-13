@@ -13,7 +13,7 @@ The ToolipsDefaults extension provides various default Styles and Components for
 module ToolipsDefaults
 
 using Toolips
-import Toolips: SpoofConnection, AbstractComponent, div
+import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection
 using ToolipsSession
 include("Styles.jl")
 include("Components.jl")
