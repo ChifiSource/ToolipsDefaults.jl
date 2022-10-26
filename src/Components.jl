@@ -61,14 +61,14 @@ function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servab
     tabwindow = div("$name-tabwindow", selected = contents[1])
     content = div("$name-contents")
     tabs = Vector{Servable}()
-    for child in contents
+    [begin
         childtab = tab("$(child.name)-tab", text = child.name)
         on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
             set_children!(cm, "$name-contents", [child])
             cm[tabwindow] = "selected" => child.name
         end
-        push!(tabwindow, tab)
-    end
+        push!(tabwindow, childtab)
+    end for child in contents]
     tabwindow[:children] = tabs
     push!(tabwindow, content)
     tabwindow::Component{:div}
