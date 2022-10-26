@@ -58,7 +58,7 @@ tab(name::String, p::Pair{String, Any} ...; args ...) = Component(name,
     "tab", p ..., args ...)::Component{:tab}
 
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    tabwindow = div("$name-tabwindow", selected = contents[1])
+    tabwindow = div("$name", selected = contents[1].name)
     content = div("$name-contents")
     tabs = Vector{Servable}()
     [begin
