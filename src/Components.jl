@@ -54,7 +54,7 @@ Gets raw text of a `textdiv`.
 """
 get_raw(t::Component{:div}) = t["rawtext"]
 
-tab(name::String, p::Pair{String, Any}; args ...) = Component(name,
+tab(name::String, p::Pair{String, Any} ...; args ...) = Component(name,
     "tab", p ..., args ...)::Component{:tab}
 
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
