@@ -26,7 +26,13 @@ end
 A textdiv is a considerably advanced textbox.
 #### example
 ```
-
+route("/") do c::Connection
+    mytxtdiv = textdiv("mydiv")
+    on(c, mytxtdiv, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxtdiv]["rawtext"]
+    end
+    write!(c, mytxtdiv)
+end
 ```
 """
 function textdiv(name::String; text::String = "example")
@@ -44,25 +50,22 @@ end
 
 """
 **Defaults**
-### get_raw(t::Component{:div}) -> ::String
+### tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable}) -> ::Component{:div}
 ------------------
-Gets raw text of a `textdiv`.
+Creates a tabbed view from the Components in `contents`.
 #### example
 ```
-
+div1 = div("first-div", text = "div1")
+div2 = div("second-div", text = "div2")
+mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
-get_raw(t::Component{:div}) = t["rawtext"]
-
-tab(name::String, p::Pair{String, Any} ...; args ...) = Component(name,
-    "tab", p ..., args ...)::Component{:tab}
-
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
     tabwindow = div("$name", selected = contents[1].name)
     content = div("$name-contents")
     tabs = Vector{Servable}()
     [begin
-        childtab = tab("$(child.name)-tab", text = child.name)
+        childtab = Toolips.ul("$(child.name)-tab", text = child.name)
         on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
             set_children!(cm, "$name-contents", [child])
             cm[tabwindow] = "selected" => child.name
@@ -71,11 +74,23 @@ function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servab
     end for child in contents]
     tabwindow[:children] = tabs
     push!(tabwindow, content)
+    push!(content, first(contents))
     tabwindow::Component{:div}
 end
 
-function cursor(name::String, args ...)
-    cursor_updater = script(name, args ...)
+
+"""
+**Defaults**
+### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
+------------------
+Creates a trackable cursor with x and y values that can be used by Modifiers.
+#### example
+```
+mycurs = cursor("mycurs")
+```
+"""
+function cursor(name::String, p::Pair{String, Any}; args ...)
+    cursor_updater = script(name, p ..., args ...)
     cursor_updater["x"] = "1"
     cursor_updater["y"] = "1"
     cursor_updater[:text] = """
@@ -103,14 +118,6 @@ function textbox(name::String, range::UnitRange = 1:10;
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
         oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
-end
-
-function textbox(name::String)
-
-end
-
-function menubar()
-
 end
 
 """
@@ -170,10 +177,6 @@ function colorinput()
 
 end
 
-function tabbedview()
-
-end
-
 function update!(cm::ComponentModifier, ppane::AbstractComponent, plot::Any)
     io::IOBuffer = IOBuffer();
     show(io, "text/html", plot)
@@ -191,6 +194,7 @@ function update!(cm::ComponentModifier, ppane::AbstractComponent,
 end
 
 function on_swipe(c::Connection, cursor::Component{script}, dir::String)
+    throw("Not implemented!: This feature has not been implemented (yet)!")
     checkscript = script(text = """
     """)
     push!(cursor.extras, checkscript)
