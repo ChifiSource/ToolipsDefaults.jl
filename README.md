@@ -2,7 +2,7 @@
 
 - [Documentation](doc.toolips.app/extensions/toolips_base64)
 - [Toolips](https://github.com/ChifiSource/Toolips.jl)
-- [Extension Gallery](https://toolips.app/?page=gallery&selected=defaults)\
+- [Extension Gallery](https://toolips.app/?page=gallery&selected=defaults)
 ### what's inside?
 ToolipsDefaults contains default styles, stylesheets, Components, and compositions which can be easily integrated with your [toolips](https://github.com/ChifiSource/Toolips.jl) project. This can be a quick way to start and organize a project with some basics. 
 ##### styles
