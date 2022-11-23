@@ -19,35 +19,14 @@ function write!(ac::Component{<:Any}, plot::Any, mime::MIME{<:Any} = MIME"text/h
     plot_div[:text] = data
 end
 
-"""
-**Defaults**
-### textdiv(name::String; text::String = "example")
-------------------
-A textdiv is a considerably advanced textbox.
-#### example
-```
-route("/") do c::Connection
-    mytxtdiv = textdiv("mydiv")
-    on(c, mytxtdiv, "click") do cm::ComponentModifier
-        txtdiv_rawtxt = cm[mytxtdiv]["rawtext"]
-    end
-    write!(c, mytxtdiv)
-end
-```
-"""
-function textdiv(name::String; text::String = "example")
-    box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
-    y = 0)
-    boxupdater = script("$name-updater", text = """
-    function updateme(event) {
-        document.getElementById("$name").setAttribute("rawtext", document.getElementById("$name").textContent);
-    }
-        document.getElementById("$name").addEventListener("input", updateme);
-        """)
-        push!(box.extras, boxupdater)
-        return(box)::Component{:div}
-end
-
+#==
+- containers
+- inputs
+- textboxes
+- audiovideo
+- misc ui
+- actions
+==#
 """
 **Defaults**
 ### tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable}) -> ::Component{:div}
@@ -78,29 +57,63 @@ function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servab
     tabwindow::Component{:div}
 end
 
+function dialog(c::Connection,
+    name::String, p::Pair{String, Any} ...; x::String = 35percent,
+    y::String = 20percent, label::String = "popup", args ...)
+    maindia::Component{:dialog} = Component(name, "dialog", p ..., args ...)
+    style!(maindia, "margin-left" => x, "margin-top" => y, "width" => 30percent,
+    "position" => "fixed", "display" => "block", "background" => "transparent", "border-width" => 0px)
+    # top bar
+    topbar::Component{:div} = div("bar$name")
+    topblabel::Component{:b} = Toolips.b(text = label, align = "center")
+    style!(topblabel, "color" => "white", "display" => "inline-block", "margin-left" => 5px)
+    xbutton::Component{:button} = button("topx$name", text = "X", align = "right")
+    on(c, xbutton, "click") do cm::ComponentModifier
+        remove!(cm, maindia)
+    end
+    style!(xbutton, "color" => "white", "background-color" => "red", "display" => "inline-block", "float" => "right",
+    "border-radius" => 4px, "border-width" => 0px)
+    style!(topbar,
+    "background-color" => "blue", "border-radius" => 4px, "padding" => 1px, "border-width" => 0px)
+    push!(topbar, topblabel, xbutton)
+    # contents
+    maindia[:children] = [topbar]
+    contentarea::Component{:div} = div("content$name")
+    style!(contentarea, "background-color" => "white", "border-radius" => "3px",
+    "border-top" => "0px", "border-width" => 5px, "border-color" => "gray")
+    push!(maindia, contentarea)
+    maindia
+end
+
+push!(dia::Component{:dialog}, comps::Servable ...) = push!(dia["content$(dia.name)"], comps ...)
 
 """
 **Defaults**
-### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
+### textdiv(name::String; text::String = "example")
 ------------------
-Creates a trackable cursor with x and y values that can be used by Modifiers.
+A textdiv is a considerably advanced textbox.
 #### example
 ```
-mycurs = cursor("mycurs")
+route("/") do c::Connection
+    mytxtdiv = textdiv("mydiv")
+    on(c, mytxtdiv, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxtdiv]["rawtext"]
+    end
+    write!(c, mytxtdiv)
+end
 ```
 """
-function cursor(name::String, p::Pair{String, Any}; args ...)
-    cursor_updater = script(name, p ..., args ...)
-    cursor_updater["x"] = "1"
-    cursor_updater["y"] = "1"
-    cursor_updater[:text] = """
-    function updatecursor(event) {
-        document.getElementById("$name").setAttribute("x", event.clientX);
-        document.getElementById("$name").setAttribute("y", event.clientY);
+function textdiv(name::String; text::String = "example")
+    box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
+    y = 0)
+    boxupdater = script("$name-updater", text = """
+    function updateme(event) {
+        document.getElementById("$name").setAttribute("rawtext", document.getElementById("$name").textContent);
     }
-    document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
-   """
-   cursor_updater::Component{:script}
+        document.getElementById("$name").addEventListener("input", updateme);
+        """)
+        push!(box.extras, boxupdater)
+        return(box)::Component{:div}
 end
 
 """
@@ -159,6 +172,12 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop
 end
 
+option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
+
+function colorinput(name::String, )
+    input(name, type = "color", value = value, p ..., args ...)::Component{:input}
+end
+
 function audio(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "audio controls", ps..., args ...)
 end
@@ -167,31 +186,36 @@ function video(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "video", ps ..., args ...)
 end
 
-option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
-
 function progress(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "progress", ps..., args ...)
 end
 
-function colorinput()
 
+
+"""
+**Defaults**
+### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
+------------------
+Creates a trackable cursor with x and y values that can be used by Modifiers.
+#### example
+```
+mycurs = cursor("mycurs")
+```
+"""
+function cursor(name::String, p::Pair{String, Any}; args ...)
+    cursor_updater = script(name, p ..., args ...)
+    cursor_updater["x"] = "1"
+    cursor_updater["y"] = "1"
+    cursor_updater[:text] = """
+    function updatecursor(event) {
+        document.getElementById("$name").setAttribute("x", event.clientX);
+        document.getElementById("$name").setAttribute("y", event.clientY);
+    }
+    document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
+   """
+   cursor_updater::Component{:script}
 end
 
-function update!(cm::ComponentModifier, ppane::AbstractComponent, plot::Any)
-    io::IOBuffer = IOBuffer();
-    show(io, "text/html", plot)
-    data::String = String(io.data)
-    data = replace(data,
-     """<?xml version=\"1.0\" encoding=\"utf-8\"?>\n""" => "")
-    set_text!(cm, ppane.name, data)
-end
-
-function update!(cm::ComponentModifier, ppane::AbstractComponent,
-    comp::AbstractComponent)
-    spoof = SpoofConnection()
-    write!(spoof, comp)
-    set_text!(cm, ppane.name, spoof.http.text)
-end
 
 function on_swipe(c::Connection, cursor::Component{script}, dir::String)
     throw("Not implemented!: This feature has not been implemented (yet)!")
