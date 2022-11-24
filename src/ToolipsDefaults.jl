@@ -15,6 +15,7 @@ using Toolips
 import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection, get
 import Toolips: script
 import Toolips: Modifier
+import Base: push!
 using ToolipsSession
 
 include("Styles.jl")
