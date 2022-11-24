@@ -13,6 +13,7 @@ The ToolipsDefaults extension provides various default Styles and Components for
 module ToolipsDefaults
 using Toolips
 import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection, get
+import Toolips: script
 import Toolips: Modifier
 using ToolipsSession
 
