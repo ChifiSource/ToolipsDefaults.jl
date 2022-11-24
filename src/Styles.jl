@@ -1,4 +1,41 @@
-mutable struct ColorScheme
+"""
+### ColorScheme <: Servable
+- background::String
+- foreground::String
+- face::String
+- faces_hover::String
+- text::String
+- text_facess::String
+- color1::String
+- color2::String
+- color3::String
+- color4::String
+- color5::String
+
+The `ColorScheme` provides an easy way to get a `sheet` of Styles in a particular
+color theme.
+##### example
+```
+cs = ColorScheme(background = "#FFFFFF")
+mysheet = sheet("styles", cs)
+```
+------------------
+##### constructors
+- ColorScheme(;
+        foreground::String = "#FDF8FF",
+        background::String = "#FFFFFF",
+        faces::String = "#F9AFEC",
+        faces_hover::String = "#A2DEBD",
+        text::String = "#5B4679",
+        text_faces::String = "#FFFFFF",
+        color1::String = "#00147e",
+        color2::String = "#754679",
+        color3::String = "#795B46",
+        color4::String = "#4B7946",
+        color5::String = "#80DA65"
+        )
+"""
+mutable struct ColorScheme <: Servable
     background::String
     foreground::String
     faces::String
@@ -27,6 +64,9 @@ mutable struct ColorScheme
                 color2, color3, color4, color5)::ColorScheme
     end
 end
+
+
+write!(c::Connection, cs::ColorScheme) = write!(c, sheet("styles", cs))
 
 function default_divstyle(cs::ColorScheme; padding::Integer = 7, radius1::Integer = 15)
     Style("div", padding = padding, "background-color" => cs.background,
@@ -57,7 +97,7 @@ default_pstyle(cs::ColorScheme; textsize = 12pt) = ps = Style("p",
 function default_sectionstyle(cs::ColorScheme; padding::Any = 30px,
     radius::Any = 10px)
     sectionst = Style("section", padding = "30px", "border-color" => cs.color3,
-    "border-width" = "2px", "border-radius" => 10px, "border-style" => "solid",
+    "border-width" => "2px", "border-radius" => 10px, "border-style" => "solid",
     "transition" => 1seconds)
 end
 
@@ -93,3 +133,7 @@ function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
                 h4s, h5s, scrollbars)
                 sheet
 end
+
+style!(c::Component{:sheet}, child::String, p::Pair{String, String}) = style!(c[:children], child, p ...)
+
+get(c::Component{<:Any}, child::String) = c[:children][child]
