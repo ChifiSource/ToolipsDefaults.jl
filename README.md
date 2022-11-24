@@ -1,4 +1,6 @@
+</br>
 <div align="center"><img src = "https://github.com/ChifiSource/image_dump/blob/main/toolips/toolipsdefaults.png" href = "https://toolips.app"></img></div>
+</br>
 
 - [Documentation](doc.toolips.app/extensions/toolips_base64)
 - [Toolips](https://github.com/ChifiSource/Toolips.jl)
