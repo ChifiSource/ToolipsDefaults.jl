@@ -85,8 +85,6 @@ function dialog(c::Connection,
     maindia
 end
 
-push!(dia::Component{:dialog}, comps::Component{<:Any} ...) = push!(dia["content$(dia.name)"], comps ...)
-
 """
 **Defaults**
 ### textdiv(name::String; text::String = "example")
