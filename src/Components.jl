@@ -81,7 +81,7 @@ function dialog(c::Connection,
     contentarea::Component{:div} = div("content$name")
     style!(contentarea, "background-color" => "white", "border-radius" => "3px",
     "border-top" => "0px", "border-width" => 5px, "border-color" => "gray")
-    push!(maindia, contentarea)
+    push!(maindia[:children], contentarea)
     maindia
 end
 
