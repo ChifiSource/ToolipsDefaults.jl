@@ -78,7 +78,7 @@ function dialog(c::Connection,
     push!(topbar, topblabel, xbutton)
     # contents
     maindia[:children] = [topbar]
-    contentarea::Component{:div} = div("content$name")
+    contentarea::Component{:div} = div("$name-contents")
     style!(contentarea, "background-color" => "white", "border-radius" => "3px",
     "border-top" => "0px", "border-width" => 5px, "border-color" => "gray")
     push!(maindia[:children], contentarea)
@@ -172,8 +172,11 @@ end
 
 option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
 
-function colorinput(name::String, )
-    input(name, type = "color", value = value, p ..., args ...)::Component{:input}
+function colorinput(name::String, p::Pair{String, Any} ...;
+    value::String = "#ffffff", args ...)
+    input(name, type = "color", value = value,
+    oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+    args ...)::Component{:input}
 end
 
 function audio(name::String, ps::Pair{String, String} ...; args ...)
