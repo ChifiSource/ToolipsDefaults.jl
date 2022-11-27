@@ -102,16 +102,9 @@ end
 ```
 """
 function textdiv(name::String; text::String = "example")
-    box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
+    box = div(name, contenteditable = true, text = text, selection = "none", x = 0,
     y = 0)
-    boxupdater = script("$name-updater", text = """
-    function updateme(event) {
-        document.getElementById("$name").setAttribute("rawtext", document.getElementById("$name").textContent);
-    }
-        document.getElementById("$name").addEventListener("input", updateme);
-        """)
-        push!(box.extras, boxupdater)
-        return(box)::Component{:div}
+    return(box)::Component{:div}
 end
 
 """
