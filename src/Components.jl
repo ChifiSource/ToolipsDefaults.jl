@@ -102,8 +102,11 @@ end
 ```
 """
 function textdiv(name::String; text::String = "example")
-    box = div(name, contenteditable = true, text = text, selection = "none", x = 0,
-    y = 0)
+    raw = element("raw$name")
+    style!(raw, "display" => "none")
+    box = div(name, contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
+    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;")
+    push!(box.extras, raw)
     return(box)::Component{:div}
 end
 
