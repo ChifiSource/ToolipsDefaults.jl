@@ -13,18 +13,19 @@ The ToolipsDefaults extension provides various default Styles and Components for
 module ToolipsDefaults
 using Toolips
 import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection, get
-import Toolips: script, style!
+import Toolips: style!, write!
 import Base: push!
 using ToolipsSession
-import ToolipsSession: bind!, AbstractInputMap, AbstractComponentModifier
+import ToolipsSession: bind!, InputMap
 
 include("Styles.jl")
 include("Components.jl")
 
 """
 """
-mutable struct SwipeMap <: AbstractInputMap
-    bindings::Vector{Pair{String, Function}}
+mutable struct SwipeMap <: InputMap
+    bindings::Dict{String, Function}
+    SwipeMap() = new(Dict{String, Function}())
 end
 
 function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
@@ -36,10 +37,27 @@ function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
     sm.bindings[swipe] = f
 end
 
-function bind!(c::Connection, cm::ComponentModifier, sm::SwipeMap,
+function bind!(c::Connection, sm::SwipeMap,
     readonly::Vector{String} = Vector{String}())
     swipes = keys
-    sc = script("swipemap", text = """
+    swipes = ["left", "right", "up", "down"]
+    newswipes = Dict([begin
+        if swipe in keys(sm.bindings)
+            ref = ToolipsSession.gen_ref()
+            if getip(c) in keys(c[:Session].iptable)
+                push!(c[:Session][getip(c)], "$ref" => sm.bindings[swipe])
+            else
+                c[:Session][getip(c)] = Dict("$ref" => sm.bindings[swipe])
+            end
+            if length(readonly) > 0
+                c[:Session].readonly["$ip$ref"] = readonly
+            end
+            swipe => "sendpage('$ref');"
+        else
+            swipe => ""
+        end
+    end for swipe in swipes])
+    sc::Component{:script} = script("swipemap", text = """
     document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 
@@ -70,15 +88,16 @@ function handleTouchMove(evt) {
 
     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
         if ( xDiff > 0 ) {
-            /* right swipe */
+            $(newswipes["left"])
         } else {
-            /* left swipe */
+
+            $(newswipes["right"])
         }
     } else {
         if ( yDiff > 0 ) {
-            /* down swipe */
+            $(newswipes["up"])
         } else {
-            /* up swipe */
+            $(newswipes["down"])
         }
     }
     /* reset values */
@@ -87,6 +106,7 @@ function handleTouchMove(evt) {
 };
 
 """)
+    write!(c, sc)
 end
 
 

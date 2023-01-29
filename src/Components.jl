@@ -159,6 +159,16 @@ function rangeslider(name::String, range::UnitRange = 1:100;
             oninput = "\"this.setAttribute('value',this.value);\"")
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function dropdown(name::String, options::Vector{Servable})
     thedrop = Component(name, "select")
     thedrop["oninput"] = "\"this.setAttribute('value',this.value);\""
@@ -166,8 +176,29 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop
 end
 
-option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
 
+```
+"""
+option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
+ "option", args)
+
+ """
+ **Toolips Defaults**
+ ### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+ ------------------
+ Creates a range slider component.
+ #### example
+ ```
+
+ ```
+ """
 function colorinput(name::String, p::Pair{String, Any} ...;
     value::String = "#ffffff", args ...)
     input(name, type = "color", value = value,
@@ -175,14 +206,44 @@ function colorinput(name::String, p::Pair{String, Any} ...;
     args ...)::Component{:input}
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function audio(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "audio controls", ps..., args ...)
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function video(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "video", ps ..., args ...)
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function progress(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "progress", ps..., args ...)
 end
