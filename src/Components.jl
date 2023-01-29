@@ -187,8 +187,6 @@ function progress(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "progress", ps..., args ...)
 end
 
-
-
 """
 **Defaults**
 ### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
@@ -211,12 +209,4 @@ function cursor(name::String, p::Pair{String, Any}; args ...)
     document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
    cursor_updater::Component{:script}
-end
-
-
-function on_swipe(c::Connection, cursor::Component{script}, dir::String)
-    throw("Not implemented!: This feature has not been implemented (yet)!")
-    checkscript = script(text = """
-    """)
-    push!(cursor.extras, checkscript)
 end
