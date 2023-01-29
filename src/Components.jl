@@ -40,18 +40,17 @@ mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    tabwindow = div("$name", selected = contents[1].name)
+    tabwindow = div(name, selected = contents[1].name)
     content = div("$name-contents")
-    tabs = Vector{Servable}()
     [begin
         childtab = Toolips.ul("$(child.name)-tab", text = child.name)
-        on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
+        style!(childtab, "display" => "inline-block", "cursor" => "pointer")
+        on(c, childtab, "click", [name]) do cm::ComponentModifier
             set_children!(cm, "$name-contents", [child])
             cm[tabwindow] = "selected" => child.name
         end
         push!(tabwindow, childtab)
     end for child in contents]
-    tabwindow[:children] = tabs
     push!(tabwindow, content)
     push!(content, first(contents))
     tabwindow::Component{:div}
