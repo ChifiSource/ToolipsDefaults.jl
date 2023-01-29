@@ -40,18 +40,17 @@ mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
 function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    tabwindow = div("$name", selected = contents[1].name)
+    tabwindow = div(name, selected = contents[1].name)
     content = div("$name-contents")
-    tabs = Vector{Servable}()
     [begin
         childtab = Toolips.ul("$(child.name)-tab", text = child.name)
-        on(c, childtab, "click", ["$name-contents"]) do cm::ComponentModifier
+        style!(childtab, "display" => "inline-block", "cursor" => "pointer")
+        on(c, childtab, "click", [name]) do cm::ComponentModifier
             set_children!(cm, "$name-contents", [child])
             cm[tabwindow] = "selected" => child.name
         end
         push!(tabwindow, childtab)
     end for child in contents]
-    tabwindow[:children] = tabs
     push!(tabwindow, content)
     push!(content, first(contents))
     tabwindow::Component{:div}
@@ -78,14 +77,12 @@ function dialog(c::Connection,
     push!(topbar, topblabel, xbutton)
     # contents
     maindia[:children] = [topbar]
-    contentarea::Component{:div} = div("content$name")
+    contentarea::Component{:div} = div("$name-contents")
     style!(contentarea, "background-color" => "white", "border-radius" => "3px",
     "border-top" => "0px", "border-width" => 5px, "border-color" => "gray")
-    push!(maindia, contentarea)
+    push!(maindia[:children], contentarea)
     maindia
 end
-
-push!(dia::Component{:dialog}, comps::Servable ...) = push!(dia["content$(dia.name)"], comps ...)
 
 """
 **Defaults**
@@ -104,16 +101,12 @@ end
 ```
 """
 function textdiv(name::String; text::String = "example")
-    box = div(name, contenteditable = true, text = text, rawtext = "```text```", selection = "none", x = 0,
-    y = 0)
-    boxupdater = script("$name-updater", text = """
-    function updateme(event) {
-        document.getElementById("$name").setAttribute("rawtext", document.getElementById("$name").textContent);
-    }
-        document.getElementById("$name").addEventListener("input", updateme);
-        """)
-        push!(box.extras, boxupdater)
-        return(box)::Component{:div}
+    raw = element("raw$name")
+    style!(raw, "display" => "none")
+    box = div(name, contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
+    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;")
+    push!(box.extras, raw)
+    return(box)::Component{:div}
 end
 
 """
@@ -165,6 +158,16 @@ function rangeslider(name::String, range::UnitRange = 1:100;
             oninput = "\"this.setAttribute('value',this.value);\"")
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function dropdown(name::String, options::Vector{Servable})
     thedrop = Component(name, "select")
     thedrop["oninput"] = "\"this.setAttribute('value',this.value);\""
@@ -172,25 +175,77 @@ function dropdown(name::String, options::Vector{Servable})
     thedrop
 end
 
-option(name::String, ps::Pair{String, String} ...; args ...) = Component(name, "option", args)
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
 
-function colorinput(name::String, )
-    input(name, type = "color", value = value, p ..., args ...)::Component{:input}
+```
+"""
+option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
+ "option", args)
+
+ """
+ **Toolips Defaults**
+ ### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+ ------------------
+ Creates a range slider component.
+ #### example
+ ```
+
+ ```
+ """
+function colorinput(name::String, p::Pair{String, Any} ...;
+    value::String = "#ffffff", args ...)
+    input(name, type = "color", value = value,
+    oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+    args ...)::Component{:input}
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function audio(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "audio controls", ps..., args ...)
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function video(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "video", ps ..., args ...)
 end
 
+"""
+**Toolips Defaults**
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+------------------
+Creates a range slider component.
+#### example
+```
+
+```
+"""
 function progress(name::String, ps::Pair{String, String} ...; args ...)
     Component(name, "progress", ps..., args ...)
 end
-
-
 
 """
 **Defaults**
@@ -214,12 +269,4 @@ function cursor(name::String, p::Pair{String, Any}; args ...)
     document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
    cursor_updater::Component{:script}
-end
-
-
-function on_swipe(c::Connection, cursor::Component{script}, dir::String)
-    throw("Not implemented!: This feature has not been implemented (yet)!")
-    checkscript = script(text = """
-    """)
-    push!(cursor.extras, checkscript)
 end
