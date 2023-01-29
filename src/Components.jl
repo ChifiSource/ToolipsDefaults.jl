@@ -7,7 +7,6 @@ A catchall for `write!` on `Components` to display julia types.
 ```
 using Plots
 plt = plot(1:5, 1:5)
-pltdiv = div("pltdiv")
 write!(pltdiv, plot, MIME"text/html")
 ```
 """
@@ -31,7 +30,9 @@ end
 **Defaults**
 ### tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable}) -> ::Component{:div}
 ------------------
-Creates a tabbed view from the Components in `contents`.
+Creates a tabbed view from the Components in `contents`. `contents` will be
+a `Vector{"Servable"}` of each page. The pages content is stored within a `Component{:div}`
+with the name `(\$name)-contents`.
 #### example
 ```
 div1 = div("first-div", text = "div1")
@@ -56,10 +57,24 @@ function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servab
     tabwindow::Component{:div}
 end
 
+"""
+**Defaults**
+### dialog(c::Connection, name::String, p::Pair{String, Any} ...; x::String = 35percent,
+y::String = 20percentt, label::String = "popup", args ...)
+------------------
+Creates a new dialog box translated to `x` and `y` with `label` at the top. The
+topbar is named `bar(\$name)` and the content div is named `(\$name)-contents`.
+#### example
+```
+div1 = div("first-div", text = "div1")
+div2 = div("second-div", text = "div2")
+mytab_view = tabbedview(c, "mytab", [div1, div2])
+```
+"""
 function dialog(c::Connection,
     name::String, p::Pair{String, Any} ...; x::String = 35percent,
     y::String = 20percent, label::String = "popup", args ...)
-    maindia::Component{:dialog} = Component(name, "dialog", p ..., args ...)
+    maindia::Component{:dialog} = Component(name, name, p ..., args ...)
     style!(maindia, "margin-left" => x, "margin-top" => y, "width" => 30percent,
     "position" => "fixed", "display" => "block", "background" => "transparent", "border-width" => 0px)
     # top bar
@@ -88,11 +103,12 @@ end
 **Defaults**
 ### textdiv(name::String; text::String = "example")
 ------------------
-A textdiv is a considerably advanced textbox.
+A textdiv is a considerably advanced textbox. This includes an additional
+property -- to be read by a ComponentModifier -- called `rawtext`.
 #### example
 ```
 route("/") do c::Connection
-    mytxtdiv = textdiv("mydiv")
+    mytxtdiv = ToolipsDefaults.textdiv("mydiv")
     on(c, mytxtdiv, "click") do cm::ComponentModifier
         txtdiv_rawtxt = cm[mytxtdiv]["rawtext"]
     end
@@ -116,7 +132,13 @@ end
 Creates a textbox component.
 #### example
 ```
-
+route("/") do c::Connection
+    mytxt = ToolipsDefaults.textbox("mydiv")
+    on(c, mytxt, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxt]["text"]
+    end
+    write!(c, mytxtdiv)
+end
 ```
 """
 function textbox(name::String, range::UnitRange = 1:10;

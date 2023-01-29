@@ -28,6 +28,8 @@ mutable struct SwipeMap <: InputMap
     SwipeMap() = new(Dict{String, Function}())
 end
 
+"""
+"""
 function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
     swipes = ["left", "right", "up", "down"]
     if ~(swipe in swipes)
@@ -37,6 +39,8 @@ function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
     sm.bindings[swipe] = f
 end
 
+"""
+"""
 function bind!(c::Connection, sm::SwipeMap,
     readonly::Vector{String} = Vector{String}())
     swipes = keys
@@ -109,9 +113,6 @@ function handleTouchMove(evt) {
     write!(c, sc)
 end
 
+export ColorScheme, cursor, SwipeMap
 
-
-export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
-export textbox, pane, anypane, stylesheet, cursor, static_observer, numberinput
-export update!, audio, video, option, progress
 end # module
