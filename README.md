@@ -8,11 +8,11 @@
 ### what's inside?
 ToolipsDefaults contains default styles, stylesheets, Components, functions, and tools which can be easily integrated with your [toolips](https://github.com/ChifiSource/Toolips.jl) project. This can be a quick way to start and organize a project with some basics. This includes new input types, new prebuilt Components, and some other things...
 
-##### styles
+#### styles
 - The `ColorScheme` structure provides an easy format for changing colors of a `sheet`
 - The `sheet` method can be provided a `ColorScheme` and creates
 - You may use `style!(::Component{:sheet}, ::String, Pair{String, String} ...)` to style children of the sheet more quickly.
-- **Style Demonstration**
+##### example
 ```julia
 using Toolips
 using ToolipsDefaults
@@ -23,7 +23,7 @@ home = route("/") do c::Connection
   style!(mysheet, "div", "background-color" => "blue")
 end
 ```
-##### components
+#### components
 - textdiv
 - tabbedview
 - cursor
@@ -35,11 +35,11 @@ end
 - video
 - progress
 - colorinput
-- **Components Demonstration**
+##### example
 ```julia
 
 ```
-##### other
+#### other
 - Extra `write!` binding that allows for writing of most Julia types.
 - SwipeMap
-
+##### example
