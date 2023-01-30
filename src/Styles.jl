@@ -145,15 +145,12 @@ end
 
 """
 **Defaults**
-### sheet(name::String, cs::ColorScheme, p::Pair{String, Any} ...; textsize::Integer = 14,
-    face_textsize::Integer = 12, padding::Integer = 7, face_padding::Integer = 5,
-    radius1::Integer = 15, radius2::Integer = 8, transition::Float64, args ...) -> ::Component{:sheet}
+### style!(::Component{:sheet}, child::String, p::Pair{String, String} ...)
 ------------------
-Creates a new stylesheet from a ColorScheme. This makes stylesheets more easily replacable
-and easier to work with.
+Styles a child in a sheet by name.
 #### example
 ```
 
 ```
 """
-style!(c::Component{:sheet}, child::String, p::Pair{String, String}) = style!(c[:children], child, p ...)
+style!(c::Component{:sheet}, child::String, p::Pair{String, String} ...) = style!(c[:children][child], p ...)
