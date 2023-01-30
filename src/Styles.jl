@@ -96,16 +96,25 @@ default_pstyle(cs::ColorScheme; textsize = 12pt) = ps = Style("p",
 
 function default_sectionstyle(cs::ColorScheme; padding::Any = 30px,
     radius::Any = 10px)
-    sectionst = Style("section", padding = "30px", "border-color" => cs.color3,
+    Style("section", padding = "30px", "border-color" => cs.color3,
     "border-width" => "2px", "border-radius" => 10px, "border-style" => "solid",
-    "transition" => 1seconds)
+    "transition" => 1seconds)::Style
 end
 
-function default_scrollstyle(cs::ColorScheme; padding::String)
+"""
+**Defaults**
+### sheet(name::String, cs::ColorScheme, p::Pair{String, Any} ...; textsize::Integer = 14,
+    face_textsize::Integer = 12, padding::Integer = 7, face_padding::Integer = 5,
+    radius1::Integer = 15, radius2::Integer = 8, transition::Float64, args ...) -> ::Component{:sheet}
+------------------
+Creates a new stylesheet from a ColorScheme. This makes stylesheets more easily replacable
+and easier to work with.
+#### example
+```
 
-end
-
-function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
+```
+"""
+function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair{String, Any} ...;
                     textsize::Integer = 14, face_textsize::Integer = 12,
                     padding::Integer = 7, face_padding::Integer = 5,
                     radius1::Integer = 15, radius2::Integer = 8,
@@ -134,6 +143,14 @@ function sheet(name::String, cs::ColorScheme = ColorScheme(), p::Pair ...;
                 sheet
 end
 
-style!(c::Component{:sheet}, child::String, p::Pair{String, String}) = style!(c[:children], child, p ...)
+"""
+**Defaults**
+### style!(::Component{:sheet}, child::String, p::Pair{String, String} ...)
+------------------
+Styles a child in a sheet by name.
+#### example
+```
 
-get(c::Component{<:Any}, child::String) = c[:children][child]
+```
+"""
+style!(c::Component{:sheet}, child::String, p::Pair{String, String} ...) = style!(c[:children][child], p ...)

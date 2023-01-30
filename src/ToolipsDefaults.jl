@@ -14,7 +14,7 @@ module ToolipsDefaults
 using Toolips
 import Toolips: SpoofConnection, AbstractComponent, div, AbstractConnection, get
 import Toolips: style!, write!
-import Base: push!
+import Base: push!, getindex, setindex!
 using ToolipsSession
 import ToolipsSession: bind!, InputMap
 
@@ -22,12 +22,107 @@ include("Styles.jl")
 include("Components.jl")
 
 """
+### ServerData <: Toolips.ServerExtension
+- type::Symbol
+- data::Dict{String, Any}
+
+A simple extension to hold any server data inside a simple `Dict`.
+------------------
+##### constructors
+- ConnectionData()
+"""
+mutable struct ServerData <: Toolips.ServerExtension
+    type::Symbol
+    data::Dict{String, Any}
+    ServerData() = new(:connection, Dict{String, Any}())
+end
+
+ getindex(sd::ServerData, s::String) = ServerData.data[s]
+
+ setindex!(sd::ServerData, a::Any, s::String) = ServerData.data[s] = a
+
+"""
+### SwipeMap <: ToolipsSession.InputMap
+- bindings**::Dict{String, Function}**
+
+The `SwipeMap` is an input map for swipe controls. Use the
+`bind!(::Function, ::Connection, ::SwipeMap, ::String)` method to make
+bindings to the map, then use `bind!(::Connection, ::SwipeMap, ::VectorString)`
+to bind it to the `Connection`. The possible bindings include `left`, `right`,
+`up`, and `down` -- all as `Strings`.
+##### example
+```
+swipe = route("/swipe") do c::Connection
+    sm = ToolipsDefaults.SwipeMap()
+    swipe_identifier = h("swipeid", 1, text = "none", align = "center")
+    style!(swipe_identifier, "margin-top" => 40percent, "font-size" => 25pt)
+    bod = body("mybody")
+    bind!(c, sm, "right") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "right")
+        style!(cm, bod, "background-color" => "black")
+    end
+    bind!(c, sm, "left") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "left")
+        style!(cm, bod, "background-color" => "orange")
+    end
+    bind!(c, sm, "up") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "up")
+        style!(cm, bod, "background-color" => "blue")
+    end
+    bind!(c, sm, "down") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "down")
+        style!(cm, bod, "background-color" => "pink")
+    end
+    bind!(c, sm)
+    push!(bod, swipe_identifier)
+    style!(bod, "transition" => 5seconds)
+    write!(c, bod)
+end
+```
+------------------
+##### constructors
+- SwipeMap()
 """
 mutable struct SwipeMap <: InputMap
     bindings::Dict{String, Function}
     SwipeMap() = new(Dict{String, Function}())
 end
 
+"""
+**Defaults**
+### bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
+------------------
+Binds a swipe to an event, swipes can be "left", "right", "up", or "down".
+#### example
+```
+swipe = route("/swipe") do c::Connection
+    sm = ToolipsDefaults.SwipeMap()
+    swipe_identifier = h("swipeid", 1, text = "none", align = "center")
+    style!(swipe_identifier, "margin-top" => 40percent, "font-size" => 25pt)
+    bod = body("mybody")
+    bind!(c, sm, "right") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "right")
+        style!(cm, bod, "background-color" => "black")
+    end
+    bind!(c, sm, "left") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "left")
+        style!(cm, bod, "background-color" => "orange")
+    end
+    bind!(c, sm, "up") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "up")
+        style!(cm, bod, "background-color" => "blue")
+    end
+    bind!(c, sm, "down") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "down")
+        style!(cm, bod, "background-color" => "pink")
+    end
+    bind!(c, sm)
+    push!(bod, swipe_identifier)
+    style!(bod, "transition" => 5seconds)
+    write!(c, bod)
+end
+```
+"""
 function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
     swipes = ["left", "right", "up", "down"]
     if ~(swipe in swipes)
@@ -37,6 +132,41 @@ function bind!(f::Function, c::Connection, sm::SwipeMap, swipe::String)
     sm.bindings[swipe] = f
 end
 
+"""
+**Defaults**
+### bind!(c::Connection, sm::SwipeMap, readonly::Vector{String} = Vector{String})
+------------------
+Binds a `SwipeMap` to a `Connection`.
+#### example
+```
+swipe = route("/swipe") do c::Connection
+    sm = ToolipsDefaults.SwipeMap()
+    swipe_identifier = h("swipeid", 1, text = "none", align = "center")
+    style!(swipe_identifier, "margin-top" => 40percent, "font-size" => 25pt)
+    bod = body("mybody")
+    bind!(c, sm, "right") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "right")
+        style!(cm, bod, "background-color" => "black")
+    end
+    bind!(c, sm, "left") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "left")
+        style!(cm, bod, "background-color" => "orange")
+    end
+    bind!(c, sm, "up") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "up")
+        style!(cm, bod, "background-color" => "blue")
+    end
+    bind!(c, sm, "down") do cm::ComponentModifier
+        set_text!(cm, swipe_identifier, "down")
+        style!(cm, bod, "background-color" => "pink")
+    end
+    bind!(c, sm)
+    push!(bod, swipe_identifier)
+    style!(bod, "transition" => 5seconds)
+    write!(c, bod)
+end
+```
+"""
 function bind!(c::Connection, sm::SwipeMap,
     readonly::Vector{String} = Vector{String}())
     swipes = keys
@@ -109,9 +239,6 @@ function handleTouchMove(evt) {
     write!(c, sc)
 end
 
+export ColorScheme, cursor, SwipeMap
 
-
-export option, ColorScheme, dropdown, rangeslider, numberinput, containertextbox
-export textbox, pane, anypane, stylesheet, cursor, static_observer, numberinput
-export update!, audio, video, option, progress
 end # module

@@ -7,7 +7,6 @@ A catchall for `write!` on `Components` to display julia types.
 ```
 using Plots
 plt = plot(1:5, 1:5)
-pltdiv = div("pltdiv")
 write!(pltdiv, plot, MIME"text/html")
 ```
 """
@@ -31,7 +30,9 @@ end
 **Defaults**
 ### tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable}) -> ::Component{:div}
 ------------------
-Creates a tabbed view from the Components in `contents`.
+Creates a tabbed view from the Components in `contents`. `contents` will be
+a `Vector{"Servable"}` of each page. The pages content is stored within a `Component{:div}`
+with the name `(\$name)-contents`.
 #### example
 ```
 div1 = div("first-div", text = "div1")
@@ -56,6 +57,20 @@ function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servab
     tabwindow::Component{:div}
 end
 
+"""
+**Defaults**
+### dialog(c::Connection, name::String, p::Pair{String, Any} ...; x::String = 35percent,
+y::String = 20percentt, label::String = "popup", args ...)
+------------------
+Creates a new dialog box translated to `x` and `y` with `label` at the top. The
+topbar is named `bar(\$name)` and the content div is named `(\$name)-contents`.
+#### example
+```
+div1 = div("first-div", text = "div1")
+div2 = div("second-div", text = "div2")
+mytab_view = tabbedview(c, "mytab", [div1, div2])
+```
+"""
 function dialog(c::Connection,
     name::String, p::Pair{String, Any} ...; x::String = 35percent,
     y::String = 20percent, label::String = "popup", args ...)
@@ -88,11 +103,12 @@ end
 **Defaults**
 ### textdiv(name::String; text::String = "example")
 ------------------
-A textdiv is a considerably advanced textbox.
+A textdiv is a considerably advanced textbox. This includes an additional
+property -- to be read by a ComponentModifier -- called `rawtext`.
 #### example
 ```
 route("/") do c::Connection
-    mytxtdiv = textdiv("mydiv")
+    mytxtdiv = ToolipsDefaults.textdiv("mydiv")
     on(c, mytxtdiv, "click") do cm::ComponentModifier
         txtdiv_rawtxt = cm[mytxtdiv]["rawtext"]
     end
@@ -111,32 +127,72 @@ end
 
 """
 **Defaults**
-### textbox(name::String, range::UnitRange = 1:10; text::String = "", size::Integer = 10) -> ::Component
+### textbox(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+text::String = "", size::Integer = 10, args ...) -> ::Component
 ------------------
-Creates a textbox component.
+Creates a textbox component. Value is stored in the `value` attribute.
 #### example
 ```
-
+route("/") do c::Connection
+    mytxt = ToolipsDefaults.textbox("mydiv")
+    on(c, mytxt, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxt]["value"]
+    end
+    write!(c, mytxtdiv)
+end
 ```
 """
-function textbox(name::String, range::UnitRange = 1:10;
-                text::String = "", size::Integer = 10)
+function textbox(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+                text::String = "", size::Integer = 10, args ...)
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
-        oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
+        oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+         args ...)::Component{:input}
+end
+
+"""
+**Defaults**
+### password(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+text::String = "", size::Integer = 10, args ...) -> ::Component{:input}
+------------------
+Creates a textbox component. Value is stored in the `value` attribute.
+#### example
+```
+route("/") do c::Connection
+    mytxt = ToolipsDefaults.textbox("mydiv")
+    on(c, mytxt, "click") do cm::ComponentModifier
+        txt = cm[mytxt]["value"]
+    end
+    write!(c, mytxt)
+end
+```
+"""
+function password(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+                text::String = "", size::Integer = 10, args ...)
+        input(name, type = "password", minlength = range[1], maxlength = range[2],
+        value = text, size = size,
+        oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+        args ...)::Component{:input}
 end
 
 """
 **Toolips Defaults**
 ### numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5) -> ::Component
 ------------------
-Creates a number input component.
+Creates a number input component. Value is stored in the `value` attribute.
 #### example
 ```
-
+route("/") do c::Connection
+    mytxt = ToolipsDefaults.textbox("mydiv")
+    on(c, mytxt, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxt]["text"]
+    end
+    write!(c, mytxt)
+end
 ```
 """
-function numberinput(name::String, range::UnitRange = 1:10; value::Integer = 5)
+function numberinput(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...
+    ; value::Integer = 5, args ...)
     input(name, type = "number", min = range[1], max = range[2],
     selected = value, oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
 end
@@ -145,7 +201,7 @@ end
 **Toolips Defaults**
 ### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
 ------------------
-Creates a range slider component.
+Creates a range slider component. Value is stored in the `value` attribute.
 #### example
 ```
 
@@ -160,9 +216,10 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### dropdown(name::String, options::Vector{Servable}) -> ::Component{:input}
 ------------------
-Creates a range slider component.
+Creates a dropdown Component. Value is stored in the `value` attribute. `options`
+is a `Vector` of `ToolipsDefaults.option`
 #### example
 ```
 
@@ -177,9 +234,9 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### option(name::String, ps::Pair{String, String} ...; args ...) -> ::Component
 ------------------
-Creates a range slider component.
+Creates an Option Component..
 #### example
 ```
 
@@ -190,9 +247,9 @@ option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
 
  """
  **Toolips Defaults**
- ### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+ ### colorinput(name::String, p::Pair{String, Any} ...; value = "#ffffff", args ...) -> ::Component{:input}
  ------------------
- Creates a range slider component.
+Creates a color input Component.
  #### example
  ```
 
@@ -207,7 +264,7 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{<:Any}
 ------------------
 Creates a range slider component.
 #### example
@@ -221,9 +278,9 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### video(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{:video}
 ------------------
-Creates a range slider component.
+Creates a video Component.
 #### example
 ```
 
@@ -251,10 +308,17 @@ end
 **Defaults**
 ### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
 ------------------
-Creates a trackable cursor with x and y values that can be used by Modifiers.
+Creates a trackable cursor with x and y values that can be used by Modifiers. Use
+the `x` and `y` attributes to retrieve the cursor position.
 #### example
 ```
-mycurs = cursor("mycurs")
+route("/") do c::Connection
+    mycurs = cursor("mycurs")
+    write!(c, mycurs)
+    on(c, "click") do cm::ComponentModifier
+        println(cm[mycurs]["x"], cm[mycurs]["y"])
+    end
+end
 ```
 """
 function cursor(name::String, p::Pair{String, Any}; args ...)
