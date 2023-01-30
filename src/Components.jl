@@ -136,7 +136,7 @@ Creates a textbox component. Value is stored in the `value` attribute.
 route("/") do c::Connection
     mytxt = ToolipsDefaults.textbox("mydiv")
     on(c, mytxt, "click") do cm::ComponentModifier
-        txtdiv_rawtxt = cm[mytxt]["text"]
+        txtdiv_rawtxt = cm[mytxt]["value"]
     end
     write!(c, mytxtdiv)
 end
@@ -161,9 +161,9 @@ Creates a textbox component. Value is stored in the `value` attribute.
 route("/") do c::Connection
     mytxt = ToolipsDefaults.textbox("mydiv")
     on(c, mytxt, "click") do cm::ComponentModifier
-        txtdiv_rawtxt = cm[mytxt]["text"]
+        txt = cm[mytxt]["value"]
     end
-    write!(c, mytxtdiv)
+    write!(c, mytxt)
 end
 ```
 """
@@ -182,7 +182,13 @@ end
 Creates a number input component. Value is stored in the `value` attribute.
 #### example
 ```
-
+route("/") do c::Connection
+    mytxt = ToolipsDefaults.textbox("mydiv")
+    on(c, mytxt, "click") do cm::ComponentModifier
+        txtdiv_rawtxt = cm[mytxt]["text"]
+    end
+    write!(c, mytxt)
+end
 ```
 """
 function numberinput(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...
@@ -212,7 +218,8 @@ end
 **Toolips Defaults**
 ### dropdown(name::String, options::Vector{Servable}) -> ::Component{:input}
 ------------------
-Creates a dropdown Component. Value is stored in the `value` attribute.
+Creates a dropdown Component. Value is stored in the `value` attribute. `options`
+is a `Vector` of `ToolipsDefaults.option`
 #### example
 ```
 
@@ -240,9 +247,9 @@ option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
 
  """
  **Toolips Defaults**
- ### colorinput
+ ### colorinput(name::String, p::Pair{String, Any} ...; value = "#ffffff", args ...) -> ::Component{:input}
  ------------------
- Creates a range slider component.
+Creates a color input Component.
  #### example
  ```
 
@@ -257,7 +264,7 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{<:Any}
 ------------------
 Creates a range slider component.
 #### example
@@ -271,9 +278,9 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### video(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{:video}
 ------------------
-Creates a range slider component.
+Creates a video Component.
 #### example
 ```
 
@@ -301,10 +308,17 @@ end
 **Defaults**
 ### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
 ------------------
-Creates a trackable cursor with x and y values that can be used by Modifiers.
+Creates a trackable cursor with x and y values that can be used by Modifiers. Use
+the `x` and `y` attributes to retrieve the cursor position.
 #### example
 ```
-mycurs = cursor("mycurs")
+route("/") do c::Connection
+    mycurs = cursor("mycurs")
+    write!(c, mycurs)
+    on(c, "click") do cm::ComponentModifier
+        println(cm[mycurs]["x"], cm[mycurs]["y"])
+    end
+end
 ```
 """
 function cursor(name::String, p::Pair{String, Any}; args ...)
