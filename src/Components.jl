@@ -74,7 +74,7 @@ mytab_view = tabbedview(c, "mytab", [div1, div2])
 function dialog(c::Connection,
     name::String, p::Pair{String, Any} ...; x::String = 35percent,
     y::String = 20percent, label::String = "popup", args ...)
-    maindia::Component{:dialog} = Component(name, name, p ..., args ...)
+    maindia::Component{<:Any} = Component(name, name, p ..., args ...)
     style!(maindia, "margin-left" => x, "margin-top" => y, "width" => 30percent,
     "position" => "fixed", "display" => "block", "background" => "transparent", "border-width" => 0px)
     # top bar
