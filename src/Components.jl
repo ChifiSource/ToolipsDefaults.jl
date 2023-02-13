@@ -40,8 +40,9 @@ div2 = div("second-div", text = "div2")
 mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
-function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    tabwindow = div(name, selected = contents[1].name)
+function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable},
+    p::Pair{String, Any} ...; args ...)
+    tabwindow = div(name, selected = contents[1].name, p ..., args ...)
     content = div("$name-contents")
     [begin
         childtab = Toolips.ul("$(child.name)-tab", text = child.name)
@@ -101,7 +102,7 @@ end
 
 """
 **Defaults**
-### textdiv(name::String; text::String = "example")
+### textdiv(name::String, p::Pair{String, Any} ...; text::String = "example", args ...)
 ------------------
 A textdiv is a considerably advanced textbox. This includes an additional
 property -- to be read by a ComponentModifier -- called `rawtext`.
@@ -116,11 +117,13 @@ route("/") do c::Connection
 end
 ```
 """
-function textdiv(name::String; text::String = "example")
+function textdiv(name::String p::Pair{String, Any} ...; text::String = "example",
+    args ...)
     raw = element("raw$name")
     style!(raw, "display" => "none")
     box = div(name, contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
-    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;")
+    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;",
+    p ..., args ...)
     push!(box.extras, raw)
     return(box)::Component{:div}
 end
@@ -194,7 +197,8 @@ end
 function numberinput(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...
     ; value::Integer = 5, args ...)
     input(name, type = "number", min = range[1], max = range[2],
-    selected = value, oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
+    selected = value, oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+    args ...)::Component{:input}
 end
 
 """
@@ -211,7 +215,7 @@ function rangeslider(name::String, range::UnitRange = 1:100;
                     value::Integer = 50, step::Integer = 5)
     input(name, type = "range", min = string(minimum(range)),
      max = string(maximum(range)), value = value, step = step,
-            oninput = "\"this.setAttribute('value',this.value);\"")
+            oninput = "\"this.setAttribute('value',this.value);\"", p ..., args ...)
 end
 
 """
@@ -225,8 +229,8 @@ is a `Vector` of `ToolipsDefaults.option`
 
 ```
 """
-function dropdown(name::String, options::Vector{Servable})
-    thedrop = Component(name, "select")
+function dropdown(name::String, options::Vector{Servable}, p::Pair{String, Any} ...; args ...)
+    thedrop = Component(name, "select", p ..., args ...)
     thedrop["oninput"] = "\"this.setAttribute('value',this.value);\""
     thedrop[:children] = options
     thedrop
@@ -292,9 +296,9 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
+### progress(name::String, ps::Pair{String, String}; args ...) -> ::Component{:progress}
 ------------------
-Creates a range slider component.
+Creates a progress Component.
 #### example
 ```
 
@@ -306,7 +310,7 @@ end
 
 """
 **Defaults**
-### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
+### cursor(name::String, p::Pair{String, Any} ,,,; args ...) -> ::Component{:script}
 ------------------
 Creates a trackable cursor with x and y values that can be used by Modifiers. Use
 the `x` and `y` attributes to retrieve the cursor position.
@@ -321,7 +325,7 @@ route("/") do c::Connection
 end
 ```
 """
-function cursor(name::String, p::Pair{String, Any}; args ...)
+function cursor(name::String, p::Pair{String, Any} ...; args ...)
     cursor_updater = script(name, p ..., args ...)
     cursor_updater["x"] = "1"
     cursor_updater["y"] = "1"
@@ -333,4 +337,14 @@ function cursor(name::String, p::Pair{String, Any}; args ...)
     document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
    cursor_updater::Component{:script}
+end
+
+function context_menu(name::String, options::Vector{Servable}, p::Pair{String, Any} ...; args ...)
+    scr = script("$name-script", text = """const contextMenu = document.getElementById("context-menu");
+const scope = document.querySelector("body");
+    scope.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    const { clientX: mouseX, clientY: mouseY } = event;
+    contextMenu.style.top = `${mouseY}px`;
+    contextMenu.style.left = `${mouseX}px`;""")
 end
