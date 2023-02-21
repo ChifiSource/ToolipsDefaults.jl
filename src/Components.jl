@@ -247,7 +247,7 @@ Creates an Option Component..
 ```
 """
 option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
- "option", args)
+ "option", ps ..., args ...)
 
  """
  **Toolips Defaults**
@@ -339,7 +339,8 @@ function cursor(name::String, p::Pair{String, Any} ...; args ...)
    cursor_updater::Component{:script}
 end
 
-function context_menu(name::String, options::Vector{Servable}, p::Pair{String, Any} ...; args ...)
+function context_menu(name::String, menu::Component{<:Any}, curs::Component{:script},
+    p::Pair{String, Any} ...; args ...)
     scr = script("$name-script", text = """const contextMenu = document.getElementById("context-menu");
 const scope = document.querySelector("body");
     scope.addEventListener("contextmenu", (event) => {
