@@ -117,7 +117,7 @@ route("/") do c::Connection
 end
 ```
 """
-function textdiv(name::String p::Pair{String, Any} ...; text::String = "example",
+function textdiv(name::String, p::Pair{String, Any} ...; text::String = "example",
     args ...)
     raw = element("raw$name")
     style!(raw, "display" => "none")
@@ -268,34 +268,6 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{<:Any}
-------------------
-Creates a range slider component.
-#### example
-```
-
-```
-"""
-function audio(name::String, ps::Pair{String, String} ...; args ...)
-    Component(name, "audio controls", ps..., args ...)
-end
-
-"""
-**Toolips Defaults**
-### video(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{:video}
-------------------
-Creates a video Component.
-#### example
-```
-
-```
-"""
-function video(name::String, ps::Pair{String, String} ...; args ...)
-    Component(name, "video", ps ..., args ...)
-end
-
-"""
-**Toolips Defaults**
 ### progress(name::String, ps::Pair{String, String}; args ...) -> ::Component{:progress}
 ------------------
 Creates a progress Component.
@@ -339,13 +311,36 @@ function cursor(name::String, p::Pair{String, Any} ...; args ...)
    cursor_updater::Component{:script}
 end
 
-function context_menu(name::String, menu::Component{<:Any}, curs::Component{:script},
-    p::Pair{String, Any} ...; args ...)
-    scr = script("$name-script", text = """const contextMenu = document.getElementById("context-menu");
+function context_menu!(menu::Component{<:Any})
+    name = menu.name
+    scr = script("$name-script", text = """
 const scope = document.querySelector("body");
     scope.addEventListener("contextmenu", (event) => {
     event.preventDefault();
     const { clientX: mouseX, clientY: mouseY } = event;
-    contextMenu.style.top = `${mouseY}px`;
-    contextMenu.style.left = `${mouseX}px`;""")
+    document.getElementById("$name").style.top = `\${mouseY}px`;
+    document.getElementById("$name").style.left = `\${mouseX}px`;
+    document.getElementById("$name").style["opacity"] = 100;
+    });""")
+    push!(menu.extras, scr)
+    style!(menu, "opacity" => 0percent, "position" => "absolute")
+    menu::Component{<:Any}
+end
+
+function button_select(c::Connection, name::String, buttons::Vector{<:Servable},
+    unselected::Vector{Pair{String, String}} = ["background-color" => "blue",
+     "border-width" => 0px],
+    selected::Vector{Pair{String, String}} = ["background-color" => "green",
+     "border-width" => 2px])
+    selector_window = div(name, value = first(buttons)[:text])
+    [begin
+    style!(butt, unselected)
+    on(c, butt, "click") do cm
+        [style!(cm, but, unselected) for but in buttons]
+        cm[selector_window] = "value" => butt[:text]
+        style!(cm, butt, selected)
+    end
+    end for butt in buttons]
+    selector_window[:children] = Vector{Servable}(buttons)
+    selector_window::Component{:div}
 end
