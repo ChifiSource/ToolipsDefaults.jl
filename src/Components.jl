@@ -117,7 +117,7 @@ route("/") do c::Connection
 end
 ```
 """
-function textdiv(name::String, p::Pair{String, Any} ...; text::String = "example",
+function textdiv(name::String, p::Pair{String, <:Any} ...; text::String = "example",
     args ...)
     raw = element("raw$name")
     style!(raw, "display" => "none")
@@ -145,7 +145,7 @@ route("/") do c::Connection
 end
 ```
 """
-function textbox(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+function textbox(name::String, range::UnitRange = 1:10, p::Pair{String, <:Any} ...;
                 text::String = "", size::Integer = 10, args ...)
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
