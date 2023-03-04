@@ -121,9 +121,9 @@ function textdiv(name::String, p::Pair{String, <:Any} ...; text::String = "examp
     args ...)
     raw = element("raw$name")
     style!(raw, "display" => "none")
-    box = div(name, contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
+    box = div(name, p ..., contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
     y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;",
-    p ..., args ...)
+    args ...)
     push!(box.extras, raw)
     return(box)::Component{:div}
 end
@@ -229,11 +229,16 @@ is a `Vector` of `ToolipsDefaults.option`
 
 ```
 """
-function dropdown(name::String, options::Vector{Servable}, p::Pair{String, Any} ...; args ...)
+function dropdown(name::String, options::Vector{Servable}, p::Pair{String, <:Any} ...; args ...)
     thedrop = Component(name, "select", p ..., args ...)
     thedrop["oninput"] = "\"this.setAttribute('value',this.value);\""
     thedrop[:children] = options
     thedrop
+end
+
+function checkbox(name::String, p::Pair{String, <:Any} ...; args ...)
+    input(name, p  ..., type = "checkbox",
+    oninput = "this.setAttribute('value', this.checked);", args ...)
 end
 
 """
@@ -343,4 +348,10 @@ function button_select(c::Connection, name::String, buttons::Vector{<:Servable},
     end for butt in buttons]
     selector_window[:children] = Vector{Servable}(buttons)
     selector_window::Component{:div}
+end
+
+function keyinput(name::String, p::Pair{String, <:Any} ...; text = "w", args ...)
+    button(name, p ..., text = text,
+    onkeypress = "this.innerHTML=event.key;this.setAttribute('value',event.key);",
+    onclick = "this.focus();", value = "W",  args ...)
 end
