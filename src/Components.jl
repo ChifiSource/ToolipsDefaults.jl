@@ -236,9 +236,10 @@ function dropdown(name::String, options::Vector{Servable}, p::Pair{String, <:Any
     thedrop
 end
 
-function checkbox(name::String, p::Pair{String, <:Any} ...; args ...)
-    input(name, p  ..., type = "checkbox",
-    oninput = "this.setAttribute('value', this.checked);", args ...)
+function checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false,
+    args ...)
+    input(name, p  ..., type = "checkbox", value = value,
+    oninput = "this.setAttribute('value',this.checked);", args ...)
 end
 
 """
