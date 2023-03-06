@@ -239,6 +239,6 @@ function handleTouchMove(evt) {
     write!(c, sc)
 end
 
-export ColorScheme, cursor, SwipeMap
+export ColorScheme, cursor, SwipeMap, set_textdiv_caret!
 
 end # module

@@ -73,15 +73,16 @@ mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
 function dialog(c::Connection,
-    name::String, p::Pair{String, Any} ...; x::String = 35percent,
-    y::String = 20percent, label::String = "popup", args ...)
+    name::String, p::Pair{String, Any} ...; x::String = 20percent,
+    y::String = 10percent, label::String = "popup", args ...)
     maindia::Component{:dialog} = Component(name, "dialog", p ..., args ...)
-    style!(maindia, "margin-left" => x, "margin-top" => y, "width" => 30percent,
-    "position" => "fixed", "display" => "block", "background" => "transparent", "border-width" => 0px)
+    style!(maindia, "left" => x, "top" => y, "width" => 30percent,
+    "position" => "absolute", "display" => "block", "background" => "transparent", "border-width" => 0px)
     # top bar
     topbar::Component{:div} = div("bar$name")
-    topblabel::Component{:b} = Toolips.b(text = label, align = "center")
-    style!(topblabel, "color" => "white", "display" => "inline-block", "margin-left" => 5px)
+    topblabel::Component{:p} = Toolips.p("label$name", text = label, align = "center")
+    style!(topblabel, "color" => "white", "display" => "inline-block",
+    "margin-left" => 5px, "font-weight" => "bold")
     xbutton::Component{:button} = button("topx$name", text = "X", align = "right")
     on(c, xbutton, "click") do cm::ComponentModifier
         remove!(cm, maindia)
@@ -120,12 +121,81 @@ end
 function textdiv(name::String, p::Pair{String, <:Any} ...; text::String = "example",
     args ...)
     raw = element("raw$name")
+    caretpos = script("caretposition", text = """
+    function getCaretIndex$(name)(element) {
+  let position = 0;
+  const isSupported = typeof window.getSelection !== "undefined";
+  if (isSupported) {
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = window.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      position = preCaretRange.toString().length;
+    }
+  }
+  document.getElementById('$name').setAttribute('caret',position);
+}
+function createRange(node, chars, range) {
+    if (!range) {
+        range = document.createRange()
+        range.selectNode(node);
+        range.setStart(node, 0);
+    }
+
+    if (chars.count === 0) {
+        range.setEnd(node, chars.count);
+    } else if (node && chars.count >0) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (node.textContent.length < chars.count) {
+                chars.count -= node.textContent.length;
+            } else {
+                 range.setEnd(node, chars.count);
+                 chars.count = 0;
+            }
+        } else {
+            for (var lp = 0; lp < node.childNodes.length; lp++) {
+                range = createRange(node.childNodes[lp], chars, range);
+
+                if (chars.count === 0) {
+                   break;
+                }
+            }
+        }
+   }
+
+   return range;
+};
+
+function setCurrentCursorPosition$(name)(chars) {
+    chars = chars + 3;
+    if (chars >= 0) {
+        var selection = window.getSelection();
+
+        range = createRange(document.getElementById("$(name)").parentNode, { count: chars });
+
+        if (range) {
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+};""")
     style!(raw, "display" => "none")
-    box = div(name, p ..., contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
-    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;",
+    box = div(name, p ..., contenteditable = true, text = text, rawtext = "`text`",
+    caret = "0",
+    oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;getCaretIndex$(name)(this);",
     args ...)
-    push!(box.extras, raw)
+    push!(box.extras, raw, caretpos)
     return(box)::Component{:div}
+end
+
+function set_textdiv_caret!(cm::ToolipsSession.AbstractComponentModifier,
+    txtd::Component{:div},
+    char::Int64)
+    push!(cm.changes, "setCurrentCursorPosition$(txtd.name)($char);")
+
 end
 
 """
