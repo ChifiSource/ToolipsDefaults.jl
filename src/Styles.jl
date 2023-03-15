@@ -58,7 +58,7 @@ mutable struct ColorScheme <: Servable
         color2::String = "#754679",
         color3::String = "#795B46",
         color4::String = "#4B7946",
-        color5::String = "#80DA65"
+        color5::String = "#3D3D3D"
         )
         new(background, foreground, faces, faces_hover, text, text_faces, color1,
                 color2, color3, color4, color5)::ColorScheme
@@ -69,7 +69,7 @@ end
 write!(c::Connection, cs::ColorScheme) = write!(c, sheet("styles", cs))
 
 function default_divstyle(cs::ColorScheme; padding::Integer = 7, radius1::Integer = 15)
-    Style("div", padding = padding, "background-color" => cs.background,
+    Style("div", padding = padding, "background" => "transparent",
     "border-radius" => "$(radius1)px", "overflow-y" => "scroll")
 end
 
