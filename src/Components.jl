@@ -40,8 +40,9 @@ div2 = div("second-div", text = "div2")
 mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
-function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable})
-    tabwindow = div(name, selected = contents[1].name)
+function tabbedview(c::AbstractConnection, name::String, contents::Vector{Servable},
+    p::Pair{String, Any} ...; args ...)
+    tabwindow = div(name, selected = contents[1].name, p ..., args ...)
     content = div("$name-contents")
     [begin
         childtab = Toolips.ul("$(child.name)-tab", text = child.name)
@@ -72,15 +73,16 @@ mytab_view = tabbedview(c, "mytab", [div1, div2])
 ```
 """
 function dialog(c::Connection,
-    name::String, p::Pair{String, Any} ...; x::String = 35percent,
-    y::String = 20percent, label::String = "popup", args ...)
+    name::String, p::Pair{String, Any} ...; x::String = 20percent,
+    y::String = 10percent, label::String = "popup", args ...)
     maindia::Component{:dialog} = Component(name, "dialog", p ..., args ...)
-    style!(maindia, "margin-left" => x, "margin-top" => y, "width" => 30percent,
-    "position" => "fixed", "display" => "block", "background" => "transparent", "border-width" => 0px)
+    style!(maindia, "left" => x, "top" => y, "width" => 30percent,
+    "position" => "absolute", "display" => "block", "background" => "transparent", "border-width" => 0px)
     # top bar
     topbar::Component{:div} = div("bar$name")
-    topblabel::Component{:b} = Toolips.b(text = label, align = "center")
-    style!(topblabel, "color" => "white", "display" => "inline-block", "margin-left" => 5px)
+    topblabel::Component{:p} = Toolips.p("label$name", text = label, align = "center")
+    style!(topblabel, "color" => "white", "display" => "inline-block",
+    "margin-left" => 5px, "font-weight" => "bold")
     xbutton::Component{:button} = button("topx$name", text = "X", align = "right")
     on(c, xbutton, "click") do cm::ComponentModifier
         remove!(cm, maindia)
@@ -101,7 +103,7 @@ end
 
 """
 **Defaults**
-### textdiv(name::String; text::String = "example")
+### textdiv(name::String, p::Pair{String, Any} ...; text::String = "example", args ...)
 ------------------
 A textdiv is a considerably advanced textbox. This includes an additional
 property -- to be read by a ComponentModifier -- called `rawtext`.
@@ -116,13 +118,83 @@ route("/") do c::Connection
 end
 ```
 """
-function textdiv(name::String; text::String = "example")
+function textdiv(name::String, p::Pair{String, <:Any} ...; text::String = "example",
+    args ...)
     raw = element("raw$name")
+    caretpos = script("caretposition", text = """
+    function getCaretIndex$(name)(element) {
+  let position = 0;
+  const isSupported = typeof window.getSelection !== "undefined";
+  if (isSupported) {
+    const selection = window.getSelection();
+    if (selection.rangeCount !== 0) {
+      const range = window.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      position = preCaretRange.toString().length;
+    }
+  }
+  document.getElementById('$name').setAttribute('caret',position);
+}
+function createRange(node, chars, range) {
+    if (!range) {
+        range = document.createRange()
+        range.selectNode(node);
+        range.setStart(node, 0);
+    }
+
+    if (chars.count === 0) {
+        range.setEnd(node, chars.count);
+    } else if (node && chars.count >0) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (node.textContent.length < chars.count) {
+                chars.count -= node.textContent.length;
+            } else {
+                 range.setEnd(node, chars.count);
+                 chars.count = 0;
+            }
+        } else {
+            for (var lp = 0; lp < node.childNodes.length; lp++) {
+                range = createRange(node.childNodes[lp], chars, range);
+
+                if (chars.count === 0) {
+                   break;
+                }
+            }
+        }
+   }
+
+   return range;
+};
+
+function setCurrentCursorPosition$(name)(chars) {
+    chars = chars + 3;
+    if (chars >= 0) {
+        var selection = window.getSelection();
+
+        range = createRange(document.getElementById("$(name)").parentNode, { count: chars });
+
+        if (range) {
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+};""")
     style!(raw, "display" => "none")
-    box = div(name, contenteditable = true, text = text, rawtext = "`text`", selection = "none", x = "0",
-    y = "0", oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;")
-    push!(box.extras, raw)
+    box = div(name, p ..., contenteditable = true, text = text, rawtext = "`text`",
+    caret = "0",
+    oninput="document.getElementById('raw$name').innerHTML=document.getElementById('$name').textContent;getCaretIndex$(name)(this);",
+    args ...)
+    push!(box.extras, raw, caretpos)
     return(box)::Component{:div}
+end
+
+function set_textdiv_caret!(cm::ToolipsSession.AbstractComponentModifier,
+    txtd::Component{:div},
+    char::Int64)
+    push!(cm.changes, "setCurrentCursorPosition$(txtd.name)($char);")
 end
 
 """
@@ -142,7 +214,7 @@ route("/") do c::Connection
 end
 ```
 """
-function textbox(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...;
+function textbox(name::String, range::UnitRange = 1:10, p::Pair{String, <:Any} ...;
                 text::String = "", size::Integer = 10, args ...)
         input(name, type = "text", minlength = range[1], maxlength = range[2],
         value = text, size = size,
@@ -194,7 +266,8 @@ end
 function numberinput(name::String, range::UnitRange = 1:10, p::Pair{String, Any} ...
     ; value::Integer = 5, args ...)
     input(name, type = "number", min = range[1], max = range[2],
-    selected = value, oninput = "\"this.setAttribute('value',this.value);\"")::Component{:input}
+    selected = value, oninput = "\"this.setAttribute('value',this.value);\"", p ...,
+    args ...)::Component{:input}
 end
 
 """
@@ -211,7 +284,7 @@ function rangeslider(name::String, range::UnitRange = 1:100;
                     value::Integer = 50, step::Integer = 5)
     input(name, type = "range", min = string(minimum(range)),
      max = string(maximum(range)), value = value, step = step,
-            oninput = "\"this.setAttribute('value',this.value);\"")
+            oninput = "\"this.setAttribute('value',this.value);\"", p ..., args ...)
 end
 
 """
@@ -225,11 +298,27 @@ is a `Vector` of `ToolipsDefaults.option`
 
 ```
 """
-function dropdown(name::String, options::Vector{Servable})
-    thedrop = Component(name, "select")
+function dropdown(name::String, options::Vector{Servable}, p::Pair{String, <:Any} ...; args ...)
+    thedrop = Component(name, "select", p ..., args ...)
     thedrop["oninput"] = "\"this.setAttribute('value',this.value);\""
     thedrop[:children] = options
     thedrop
+end
+
+"""
+**Toolips Defaults**
+### checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false, args ...) -> ::Component{:input}
+------------------
+Creates a checkbox Component. Value is stored in the `value` attribute.
+#### example
+```
+
+```
+"""
+function checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false,
+    args ...)
+    input(name, p  ..., type = "checkbox", value = value, checked = value,
+    oninput = "this.setAttribute('value',this.checked);", args ...)
 end
 
 """
@@ -243,7 +332,7 @@ Creates an Option Component..
 ```
 """
 option(name::String, ps::Pair{String, String} ...; args ...) = Component(name,
- "option", args)
+ "option", ps ..., args ...)
 
  """
  **Toolips Defaults**
@@ -264,37 +353,9 @@ end
 
 """
 **Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{<:Any}
+### progress(name::String, ps::Pair{String, String}; args ...) -> ::Component{:progress}
 ------------------
-Creates a range slider component.
-#### example
-```
-
-```
-"""
-function audio(name::String, ps::Pair{String, String} ...; args ...)
-    Component(name, "audio controls", ps..., args ...)
-end
-
-"""
-**Toolips Defaults**
-### video(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component{:video}
-------------------
-Creates a video Component.
-#### example
-```
-
-```
-"""
-function video(name::String, ps::Pair{String, String} ...; args ...)
-    Component(name, "video", ps ..., args ...)
-end
-
-"""
-**Toolips Defaults**
-### rangeslider(name::String, range::UnitRange = 1:100; value::Integer = 50, step::Integer = 5) -> ::Component
-------------------
-Creates a range slider component.
+Creates a progress Component.
 #### example
 ```
 
@@ -306,7 +367,7 @@ end
 
 """
 **Defaults**
-### cursor(name::String, p::Pair{String, Any}; args ...) -> ::Component{:script}
+### cursor(name::String, p::Pair{String, Any} ,,,; args ...) -> ::Component{:script}
 ------------------
 Creates a trackable cursor with x and y values that can be used by Modifiers. Use
 the `x` and `y` attributes to retrieve the cursor position.
@@ -321,7 +382,7 @@ route("/") do c::Connection
 end
 ```
 """
-function cursor(name::String, p::Pair{String, Any}; args ...)
+function cursor(name::String, p::Pair{String, Any} ...; args ...)
     cursor_updater = script(name, p ..., args ...)
     cursor_updater["x"] = "1"
     cursor_updater["y"] = "1"
@@ -333,4 +394,81 @@ function cursor(name::String, p::Pair{String, Any}; args ...)
     document.getElementsByTagName("body")[0].addEventListener("mousemove", updatecursor);
    """
    cursor_updater::Component{:script}
+end
+
+"""
+**Toolips Defaults**
+### context_menu!(menu::Component{<:Any})
+------------------
+Turns any Component into a context (right-click) menu.
+#### example
+```
+
+```
+"""
+function context_menu!(menu::Component{<:Any})
+    name = menu.name
+    scr = script("$name-script", text = """
+const scope = document.querySelector("body");
+    scope.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    const { clientX: mouseX, clientY: mouseY } = event;
+    document.getElementById("$name").style.top = `\${mouseY}px`;
+    document.getElementById("$name").style.left = `\${mouseX}px`;
+    document.getElementById("$name").style["opacity"] = 100;
+    });""")
+    push!(menu.extras, scr)
+    style!(menu, "opacity" => 0percent, "position" => "absolute")
+    menu::Component{<:Any}
+end
+
+"""
+**Toolips Defaults**
+```julia
+button_select(c::Connection, name::String, buttons::Vector{<:Servable},
+unselected::Vector{Pair{String, String}}, selected::Vector{Pair{String, String}} -> ::Component{:div}
+```
+------------------
+Creates a button select div. Selected button can be accessed with the `value`
+attribute. Default is first button.
+#### example
+```
+
+```
+"""
+function button_select(c::Connection, name::String, buttons::Vector{<:Servable},
+    unselected::Vector{Pair{String, String}} = ["background-color" => "blue",
+     "border-width" => 0px],
+    selected::Vector{Pair{String, String}} = ["background-color" => "green",
+     "border-width" => 2px])
+    selector_window = div(name, value = first(buttons)[:text])
+    [begin
+    style!(butt, unselected)
+    on(c, butt, "click") do cm
+        [style!(cm, but, unselected) for but in buttons]
+        cm[selector_window] = "value" => butt[:text]
+        style!(cm, butt, selected)
+    end
+    end for butt in buttons]
+    selector_window[:children] = Vector{Servable}(buttons)
+    selector_window::Component{:div}
+end
+
+"""
+**Toolips Defaults**
+```julia
+keyinput(name::String, p::Pair{String, <:Any} ...; text::String = "w",
+args ...) -> ::Component{:button}
+```
+------------------
+Creates a key input button. Selected value is stored in the `value` attribute.
+#### example
+```
+
+```
+"""
+function keyinput(name::String, p::Pair{String, <:Any} ...; text = "w", args ...)
+    button(name, p ..., text = text,
+    onkeypress = "this.innerHTML=event.key;this.setAttribute('value',event.key);",
+    onclick = "this.focus();", value = "W",  args ...)
 end
