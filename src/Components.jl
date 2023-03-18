@@ -195,7 +195,6 @@ function set_textdiv_caret!(cm::ToolipsSession.AbstractComponentModifier,
     txtd::Component{:div},
     char::Int64)
     push!(cm.changes, "setCurrentCursorPosition$(txtd.name)($char);")
-
 end
 
 """
@@ -306,9 +305,19 @@ function dropdown(name::String, options::Vector{Servable}, p::Pair{String, <:Any
     thedrop
 end
 
+"""
+**Toolips Defaults**
+### checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false, args ...) -> ::Component{:input}
+------------------
+Creates a checkbox Component. Value is stored in the `value` attribute.
+#### example
+```
+
+```
+"""
 function checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false,
     args ...)
-    input(name, p  ..., type = "checkbox", value = value,
+    input(name, p  ..., type = "checkbox", value = value, checked = value,
     oninput = "this.setAttribute('value',this.checked);", args ...)
 end
 
@@ -387,6 +396,16 @@ function cursor(name::String, p::Pair{String, Any} ...; args ...)
    cursor_updater::Component{:script}
 end
 
+"""
+**Toolips Defaults**
+### context_menu!(menu::Component{<:Any})
+------------------
+Turns any Component into a context (right-click) menu.
+#### example
+```
+
+```
+"""
 function context_menu!(menu::Component{<:Any})
     name = menu.name
     scr = script("$name-script", text = """
@@ -403,6 +422,20 @@ const scope = document.querySelector("body");
     menu::Component{<:Any}
 end
 
+"""
+**Toolips Defaults**
+```julia
+button_select(c::Connection, name::String, buttons::Vector{<:Servable},
+unselected::Vector{Pair{String, String}}, selected::Vector{Pair{String, String}} -> ::Component{:div}
+```
+------------------
+Creates a button select div. Selected button can be accessed with the `value`
+attribute. Default is first button.
+#### example
+```
+
+```
+"""
 function button_select(c::Connection, name::String, buttons::Vector{<:Servable},
     unselected::Vector{Pair{String, String}} = ["background-color" => "blue",
      "border-width" => 0px],
@@ -421,6 +454,19 @@ function button_select(c::Connection, name::String, buttons::Vector{<:Servable},
     selector_window::Component{:div}
 end
 
+"""
+**Toolips Defaults**
+```julia
+keyinput(name::String, p::Pair{String, <:Any} ...; text::String = "w",
+args ...) -> ::Component{:button}
+```
+------------------
+Creates a key input button. Selected value is stored in the `value` attribute.
+#### example
+```
+
+```
+"""
 function keyinput(name::String, p::Pair{String, <:Any} ...; text = "w", args ...)
     button(name, p ..., text = text,
     onkeypress = "this.innerHTML=event.key;this.setAttribute('value',event.key);",
