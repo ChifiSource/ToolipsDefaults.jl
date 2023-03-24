@@ -280,8 +280,9 @@ Creates a range slider component. Value is stored in the `value` attribute.
 
 ```
 """
-function rangeslider(name::String, range::UnitRange = 1:100;
-                    value::Integer = 50, step::Integer = 5)
+function rangeslider(name::String, range::UnitRange = 1:100,
+    p::Pair{String, <:Any} ...; value::Integer = 50, step::Integer = 5,
+    args ...)
     input(name, type = "range", min = string(minimum(range)),
      max = string(maximum(range)), value = value, step = step,
             oninput = "\"this.setAttribute('value',this.value);\"", p ..., args ...)
@@ -348,7 +349,7 @@ Creates a color input Component.
 
  ```
  """
-function colorinput(name::String, p::Pair{String, Any} ...;
+function colorinput(name::String, p::Pair{String, <:Any} ...;
     value::String = "#ffffff", args ...)
     input(name, type = "color", value = value,
     oninput = "\"this.setAttribute('value',this.value);\"", p ...,
