@@ -317,8 +317,12 @@ Creates a checkbox Component. Value is stored in the `value` attribute.
 """
 function checkbox(name::String, p::Pair{String, <:Any} ...; value::Bool = false,
     args ...)
-    input(name, p  ..., type = "checkbox", value = value, checked = value,
+    ch = input(name, p  ..., type = "checkbox", value = value,
     oninput = "this.setAttribute('value',this.checked);", args ...)
+    if value
+        ch["checked"] = value
+    end
+    ch::Component{:input}
 end
 
 """
