@@ -1,3 +1,8 @@
+## dead repo
+`ToolipsDefaults` is now a part of `ToolipsServables` in `Toolips` `0.3`. [Toolips](https://github.com/ChifiSource/Toolips.jl) [ToolipsServables](https://github.com/ChifiSource/ToolipsServables.jl)
+--
+- ( **This project can still be used with `Toolips` `0.2`.** )
+
 </br>
 <div align="center"><img src = "https://github.com/ChifiSource/image_dump/blob/main/toolips/toolipsdefaults.png" href = "https://toolips.app"></img></div>
 </br>
